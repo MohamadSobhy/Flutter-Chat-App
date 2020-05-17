@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "460745823958",
+    "firebase_url": "https://chat-app-7dfd0.firebaseio.com",
+    "project_id": "chat-app-7dfd0",
+    "storage_bucket": "chat-app-7dfd0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:460745823958:android:6a122420412e34a0a71b77",
+        "android_client_info": {
+          "package_name": "m.example.chat_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "460745823958-jc0nac4c332rb2s3rg5e93ce749p0fi9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "m.example.chat_app",
+            "certificate_hash": "cb8a348da7ae28f0a7fc60c170a3129e0f009bcb"
+          }
+        },
+        {
+          "client_id": "460745823958-rsm7noc52c2vo64e1qspj9r6ukq0s481.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzRE5DiXO_pwxw76ArAz1ecnJ98OjJgD4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "460745823958-rsm7noc52c2vo64e1qspj9r6ukq0s481.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
