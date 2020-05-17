@@ -1,10 +1,13 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat_app/features/login/presentation/bloc/login_bloc.dart';
+import 'package:chat_app/features/login/presentation/pages/login_page.dart';
 import 'package:chat_app/injection_container.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,7 +15,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../main.dart';
 import '../widgets/user_item.dart';
 import './settings_page.dart';
-import './login_page.dart';
 
 class HomePage extends StatefulWidget {
   static const String routeName = '/dashboard';
@@ -78,8 +80,10 @@ class _HomePageState extends State<HomePage> {
                   } else {
                     final isLoggingOut = await _onBackButtonPressed(context);
                     if (isLoggingOut) {
-                      Routes.sailor.navigate(LoginPage.routeName,
-                          removeUntilPredicate: (_) => false);
+                      // Routes.sailor.navigate(LoginPage.routeName,
+                      //     removeUntilPredicate: (_) => false);
+                      BlocProvider.of<LoginBloc>(context)
+                          .add(SignOutWithGoogleEvent());
                     }
                   }
                 },

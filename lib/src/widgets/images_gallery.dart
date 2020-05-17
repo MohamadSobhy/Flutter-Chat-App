@@ -199,13 +199,13 @@ class _ImagesGalleryState extends State<ImagesGallery> {
   }
 
   void _sendImages() {
-    if (_selectedImages.length == 1) {
-      widget.onSendingSingleImage(_selectedImages.first);
-    } else {
-      widget.onSendingMultipleImage([..._selectedImages]);
-    }
-    setState(() {
-      _selectedImages.clear();
-    });
+    // if (_selectedImages.length == 1) {
+    //   widget.onSendingSingleImage(_selectedImages.first);
+    // } else {
+    //   widget.onSendingMultipleImage([..._selectedImages]);
+    // }
+    // setState(() {
+    //   _selectedImages.clear();
+    // });
   }
 }

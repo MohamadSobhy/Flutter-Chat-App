@@ -36,7 +36,7 @@ class _SettingsPageState extends State<SettingsPage> {
             );
           }
           accountData = json.decode(snapshot.data.getString(
-            'userData',
+            'user',
           ));
 
           _userNameController.text = accountData['displayName'];

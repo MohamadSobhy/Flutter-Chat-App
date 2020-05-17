@@ -59,7 +59,7 @@ class _ChatPageState extends State<ChatPage> {
   _readUserData() {
     prefs = serviceLocator<SharedPreferences>();
 
-    userId = json.decode(prefs.getString('userData'))['id'];
+    userId = json.decode(prefs.getString('user'))['id'];
 
     if (userId.hashCode <= widget.peerId.hashCode) {
       chatGroupId = '$userId-${widget.peerId}';
