@@ -545,14 +545,23 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8.0),
+                    border: !isImage
+                        ? Border.all(width: 0.0, color: Colors.transparent)
+                        : Border.all(
+                            width: 2.0,
+                            color: message.idFrom == userId
+                                ? Theme.of(context).primaryColor
+                                : Colors.transparent),
                     color: isSticker
                         ? Colors.transparent
                         : message.idFrom == userId
-                            ? Theme.of(context).primaryColor
+                            ? isImage
+                                ? Colors.grey[200]
+                                : Theme.of(context).primaryColor
                             : Colors.grey[200],
                   ),
                   padding: isImage
-                      ? const EdgeInsets.all(1.5)
+                      ? const EdgeInsets.all(0.0)
                       : const EdgeInsets.symmetric(
                           horizontal: 10.0,
                           vertical: 6.0,

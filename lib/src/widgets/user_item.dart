@@ -13,13 +13,13 @@ class UserItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.deepOrangeAccent,
-      elevation: 2.0,
+      color: Colors.grey[100],
+      elevation: 0.0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(10.0),
       ),
       margin: const EdgeInsets.symmetric(
-        horizontal: 5.0,
+        horizontal: 10.0,
         vertical: 5.0,
       ),
       child: ClipRRect(
@@ -28,31 +28,29 @@ class UserItem extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: _openChatPage,
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: ListTile(
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(30.0),
-                  child: CachedNetworkImage(
-                    imageUrl: userDocument.data['photoUrl'],
-                    height: 60.0,
-                    width: 60.0,
-                    fit: BoxFit.cover,
-                  ),
+            splashColor: Theme.of(context).splashColor,
+            child: ListTile(
+              leading: ClipRRect(
+                borderRadius: BorderRadius.circular(10.0),
+                child: CachedNetworkImage(
+                  imageUrl: userDocument.data['photoUrl'],
+                  height: 50.0,
+                  width: 50.0,
+                  fit: BoxFit.cover,
                 ),
-                title: Text(
-                  userDocument.data['displayName'],
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18.0,
-                  ),
+              ),
+              title: Text(
+                userDocument.data['displayName'],
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18.0,
                 ),
-                subtitle: Text(
-                  userDocument.data['email'],
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                  ),
+              ),
+              subtitle: Text(
+                userDocument.data['email'],
+                style: TextStyle(
+                  color: Colors.black,
                 ),
               ),
             ),

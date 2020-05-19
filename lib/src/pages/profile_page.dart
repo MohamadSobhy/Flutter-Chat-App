@@ -7,14 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SettingsPage extends StatefulWidget {
+class ProfilePage extends StatefulWidget {
   static const String routeName = '/settings';
 
   @override
-  _SettingsPageState createState() => _SettingsPageState();
+  _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _ProfilePageState extends State<ProfilePage> {
   final _userNameController = TextEditingController();
 
   final _phoneNumberController = TextEditingController();

@@ -7,12 +7,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sailor/sailor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'features/login/domain/entities/user.dart';
 import 'features/login/presentation/bloc/login_bloc.dart';
 import 'features/login/presentation/pages/login_page.dart';
 import 'features/login/presentation/widgets/custom_snackbar.dart';
 import 'src/pages/chat_page.dart';
 import 'src/pages/home_page.dart';
-import 'src/pages/settings_page.dart';
+import 'src/pages/profile_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,9 +32,11 @@ class MyApp extends StatelessWidget {
         return bloc;
       },
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Chat App',
         theme: ThemeData(
           primarySwatch: Colors.deepOrange,
+          splashColor: Color(0xDDFDEDF3),
         ),
         home: BlocListener<LoginBloc, LoginState>(
           listener: (ctx, state) {
@@ -55,12 +58,13 @@ class MyApp extends StatelessWidget {
             builder: (ctx, state) {
               if (state is LoggedInState) {
                 try {
-                  serviceLocator.registerLazySingleton(() => state);
+                  serviceLocator.registerLazySingleton(() => state.user);
                 } catch (err) {}
                 return HomePage();
               } else if (state is LoggedOutState) {
                 serviceLocator.unregister(
-                    instance: serviceLocator<LoggedInState>());
+                  instance: serviceLocator<User>(),
+                );
                 return LoginPage();
               } else if (state is LoadingState) {
                 return LoadingPage();
@@ -68,7 +72,7 @@ class MyApp extends StatelessWidget {
                 return LoginPage();
               } else if (state is ErrorState) {
                 try {
-                  final loggedState = serviceLocator<LoggedInState>();
+                  final currentUser = serviceLocator<User>();
                   return HomePage();
                 } catch (error) {
                   return LoginPage();
@@ -119,8 +123,8 @@ class Routes {
         builder: (_, args, params) => HomePage(),
       ),
       SailorRoute(
-        name: SettingsPage.routeName,
-        builder: (_, args, params) => SettingsPage(),
+        name: ProfilePage.routeName,
+        builder: (_, args, params) => ProfilePage(),
       ),
       SailorRoute(
         name: ChatPage.routeName,

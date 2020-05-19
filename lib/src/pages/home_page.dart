@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat_app/features/login/domain/entities/user.dart';
 import 'package:chat_app/features/login/presentation/bloc/login_bloc.dart';
 import 'package:chat_app/features/login/presentation/pages/login_page.dart';
 import 'package:chat_app/injection_container.dart';
+import 'package:chat_app/src/widgets/custom_app_bar_action.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -14,207 +16,79 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../main.dart';
 import '../widgets/user_item.dart';
-import './settings_page.dart';
+import './profile_page.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   static const String routeName = '/dashboard';
 
   @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  bool _isLoading = false;
-
-  @override
   Widget build(BuildContext context) {
-    return ModalProgressHUD(
-      inAsyncCall: _isLoading,
-      child: WillPopScope(
-        onWillPop: () => _onBackButtonPressed(context),
-        child: Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            title: Text(
-              'Dashboard',
-              style: TextStyle(
-                color: Color(0xFF08245E),
-                fontSize: 25.0,
-                fontWeight: FontWeight.bold,
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Container(
+          margin: const EdgeInsets.symmetric(
+            vertical: 7.0,
+            horizontal: 7.0,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10.0),
+            color: Colors.grey[200],
+            image: DecorationImage(
+              image: NetworkImage(serviceLocator<User>().photoUrl),
+            ),
+          ),
+          height: 45,
+          width: 45,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10.0),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _openProfilePage,
               ),
             ),
-            actions: <Widget>[
-              DropdownButton(
-                isExpanded: false,
-                underline: Container(),
-                iconEnabledColor: Color(0xFF08245E),
-                icon: Icon(Icons.more_vert),
-                iconSize: 30.0,
-                items: [
-                  DropdownMenuItem(
-                      value: 'settings',
-                      child: Row(
-                        children: <Widget>[
-                          Icon(Icons.settings),
-                          SizedBox(
-                            width: 10.0,
-                          ),
-                          Text('Settings'),
-                        ],
-                      )),
-                  DropdownMenuItem(
-                      value: 'logout',
-                      child: Row(
-                        children: <Widget>[
-                          Icon(Icons.exit_to_app),
-                          SizedBox(
-                            width: 10.0,
-                          ),
-                          Text('Logout'),
-                        ],
-                      )),
-                ],
-                onChanged: (value) async {
-                  if (value == 'settings') {
-                    _openSettingsPage();
-                  } else {
-                    final isLoggingOut = await _onBackButtonPressed(context);
-                    if (isLoggingOut) {
-                      // Routes.sailor.navigate(LoginPage.routeName,
-                      //     removeUntilPredicate: (_) => false);
-                      BlocProvider.of<LoginBloc>(context)
-                          .add(SignOutWithGoogleEvent());
-                    }
-                  }
-                },
-              )
-            ],
-          ),
-          body: StreamBuilder(
-            stream: Firestore.instance.collection('users').snapshots(),
-            builder: (ctx, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (!snapshot.hasData)
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-
-              return ListView.builder(
-                itemCount: snapshot.data.documents.length,
-                itemBuilder: (ctx, index) {
-                  return UserItem(userDocument: snapshot.data.documents[index]);
-                },
-              );
-            },
           ),
         ),
+        elevation: 0.0,
+        backgroundColor: Colors.transparent,
+        leading: CustomAppBarAction(
+          icon: Icons.search,
+          onActionPressed: _openSearchScreen,
+        ),
+        actions: <Widget>[
+          CustomAppBarAction(
+            icon: Icons.settings,
+            onActionPressed: () => _openSettingsPage(context),
+          ),
+        ],
+      ),
+      body: StreamBuilder(
+        stream: Firestore.instance.collection('users').snapshots(),
+        builder: (ctx, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData)
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+
+          return ListView.builder(
+            itemCount: snapshot.data.documents.length,
+            itemBuilder: (ctx, index) {
+              return UserItem(userDocument: snapshot.data.documents[index]);
+            },
+          );
+        },
       ),
     );
   }
 
-  Future<bool> _onBackButtonPressed(context) async {
-    final isLogOutClicked = await _showLogOutDialog(context);
-    if (isLogOutClicked != null && isLogOutClicked) {
-      setState(() {
-        _isLoading = true;
-      });
-      await FirebaseAuth.instance.signOut();
-      //await GoogleSignIn().disconnect();
-      await GoogleSignIn().signOut();
-      setState(() {
-        _isLoading = false;
-      });
+  _openSearchScreen() {}
 
-      return Future.value(true);
-    } else {
-      return Future.value(false);
-    }
+  void _openProfilePage() {
+    Routes.sailor.navigate(ProfilePage.routeName);
   }
 
-  void _openSettingsPage() {
-    Routes.sailor.navigate(SettingsPage.routeName);
-  }
-
-  Future<bool> _showLogOutDialog(context) {
-    final screenSize = MediaQuery.of(context).size;
-
-    return showDialog(
-      context: context,
-      builder: (_) {
-        return AlertDialog(
-          contentPadding: const EdgeInsets.all(0.0),
-          content: Container(
-            height: screenSize.height * 0.2,
-            width: screenSize.width * 0.5,
-            color: Colors.white,
-            child: Container(
-              color: Colors.deepOrange,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      'Log out!',
-                      style: TextStyle(
-                        color: Color(0xFF08245E),
-                        fontSize: 30.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      'Are you sure to log out?',
-                      style: TextStyle(
-                        color: Color(0xFF08245E),
-                        fontSize: 20.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          actions: <Widget>[
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  Routes.sailor.pop(false);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Text(
-                    'No',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      color: Color(0xFF08245E),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  Routes.sailor.pop(true);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Text(
-                    'Yes',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      color: Color(0xFF08245E),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-      barrierDismissible: false,
-    );
+  void _openSettingsPage(context) {
+    BlocProvider.of<LoginBloc>(context).add(SignOutWithGoogleEvent());
   }
 }
