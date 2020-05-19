@@ -6,12 +6,14 @@ class UserModel extends User {
     @required String id,
     @required String displayName,
     @required String email,
+    @required String password,
     @required String phoneNumber,
     @required String photoUrl,
   }) : super(
           id: id,
           displayName: displayName,
           email: email,
+          password: password,
           phoneNumber: phoneNumber,
           photoUrl: photoUrl,
         );
@@ -21,6 +23,7 @@ class UserModel extends User {
       id: parsedJson['id'],
       displayName: parsedJson['displayName'],
       email: parsedJson['email'],
+      password: parsedJson['password'],
       phoneNumber: parsedJson['phoneNumber'],
       photoUrl: parsedJson['photoUrl'],
     );
@@ -31,6 +34,7 @@ class UserModel extends User {
       'id': id,
       'displayName': displayName,
       'email': email,
+      'password': password,
       'phoneNumber': phoneNumber,
       'photoUrl': photoUrl,
     };

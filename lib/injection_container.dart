@@ -1,3 +1,7 @@
+import 'package:chat_app/features/login/domain/usecases/delete_account_data.dart';
+import 'package:chat_app/features/login/domain/usecases/sing_in_with_email_password.dart';
+import 'package:chat_app/features/login/domain/usecases/sing_up_with_email_password.dart';
+import 'package:chat_app/features/login/domain/usecases/update_account_info.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
@@ -26,6 +30,10 @@ Future<void> init() async {
       signInWithGoogle: serviceLocator(),
       signOutWithGoogle: serviceLocator(),
       getLoggedInUserData: serviceLocator(),
+      signInWithEmailAndPassword: serviceLocator(),
+      signUpWithEmailAndPassword: serviceLocator(),
+      updateAccountInfo: serviceLocator(),
+      deleteAccountData: serviceLocator(),
     ),
   );
 
@@ -38,6 +46,18 @@ Future<void> init() async {
   );
   serviceLocator.registerLazySingleton(
     () => GetLoggedInUserData(repository: serviceLocator()),
+  );
+  serviceLocator.registerLazySingleton(
+    () => SignInWithEmailAndPassword(repository: serviceLocator()),
+  );
+  serviceLocator.registerLazySingleton(
+    () => SignUpWithEmailAndPassword(repository: serviceLocator()),
+  );
+  serviceLocator.registerLazySingleton(
+    () => UpdateAccountInfo(repository: serviceLocator()),
+  );
+  serviceLocator.registerLazySingleton(
+    () => DeleteAccountData(repository: serviceLocator()),
   );
 
   //Repository

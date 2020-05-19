@@ -5,6 +5,7 @@ class User extends Equatable {
   final String id;
   final String displayName;
   final String email;
+  final String password;
   final String phoneNumber;
   final String photoUrl;
 
@@ -12,10 +13,18 @@ class User extends Equatable {
     @required this.id,
     @required this.displayName,
     @required this.email,
+    @required this.password,
     @required this.phoneNumber,
     @required this.photoUrl,
   });
 
   @override
-  List<Object> get props => [id, displayName, email, phoneNumber, photoUrl];
+  List<Object> get props => [
+        id,
+        displayName,
+        email,
+        password,
+        phoneNumber,
+        photoUrl,
+      ];
 }

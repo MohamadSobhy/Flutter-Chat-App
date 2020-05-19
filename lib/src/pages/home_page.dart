@@ -6,6 +6,7 @@ import 'package:chat_app/features/login/presentation/bloc/login_bloc.dart';
 import 'package:chat_app/features/login/presentation/pages/login_page.dart';
 import 'package:chat_app/injection_container.dart';
 import 'package:chat_app/src/widgets/custom_app_bar_action.dart';
+import 'package:chat_app/src/widgets/user_image_avatar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -26,29 +27,9 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Container(
-          margin: const EdgeInsets.symmetric(
-            vertical: 7.0,
-            horizontal: 7.0,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.0),
-            color: Colors.grey[200],
-            image: DecorationImage(
-              image: NetworkImage(serviceLocator<User>().photoUrl),
-            ),
-          ),
-          height: 45,
-          width: 45,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10.0),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: _openProfilePage,
-              ),
-            ),
-          ),
+        title: UserImageAvatar(
+          imageUrl: serviceLocator<User>().photoUrl,
+          onTap: _openProfilePage,
         ),
         elevation: 0.0,
         backgroundColor: Colors.transparent,
