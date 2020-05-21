@@ -2,12 +2,12 @@ import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
 
 class User extends Equatable {
-  final String id;
+  String id;
   final String displayName;
   final String email;
   final String password;
   final String phoneNumber;
-  final String photoUrl;
+  String photoUrl;
 
   User({
     @required this.id,

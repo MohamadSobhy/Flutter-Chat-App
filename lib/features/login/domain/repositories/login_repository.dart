@@ -13,10 +13,7 @@ abstract class LoginRepository {
     String email,
     String password,
   );
-  Future<Either<Failure, User>> signUpWithEmailAndPassword(
-    String email,
-    String password,
-  );
+  Future<Either<Failure, User>> signUpWithEmailAndPassword(User user);
 
   //common actions
   Future<Either<Failure, User>> getLoggedInUserData();

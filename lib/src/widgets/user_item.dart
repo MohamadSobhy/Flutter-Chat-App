@@ -32,20 +32,22 @@ class UserItem extends StatelessWidget {
             child: ListTile(
               leading: ClipRRect(
                 borderRadius: BorderRadius.circular(10.0),
-                child: CachedNetworkImage(
-                  imageUrl: userDocument.data['photoUrl'],
-                  height: 50.0,
-                  width: 50.0,
-                  fit: BoxFit.cover,
-                ),
+                child: userDocument.data['photoUrl'] == null
+                    ? Image.asset('assets/images/icon_user.png')
+                    : CachedNetworkImage(
+                        imageUrl: userDocument.data['photoUrl'],
+                        height: 50.0,
+                        width: 50.0,
+                        fit: BoxFit.fill,
+                      ),
               ),
               title: Text(
                 userDocument.data['displayName'],
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.0,
-                ),
+                style: Theme.of(context).textTheme.title.copyWith(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                    ),
               ),
               subtitle: Text(
                 userDocument.data['email'],
@@ -64,6 +66,7 @@ class UserItem extends StatelessWidget {
     Routes.sailor.navigate(ChatPage.routeName, params: {
       'peerId': userDocument.data['id'],
       'peerName': userDocument.data['displayName'],
+      'peerImageUrl': userDocument.data['photoUrl'],
     });
   }
 }

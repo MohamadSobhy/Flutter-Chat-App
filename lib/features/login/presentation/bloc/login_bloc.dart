@@ -45,7 +45,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     if (event is SignInWithGoogleEvent) {
       yield LoadingState();
 
-      yield* _signInOSignUpEitherHandler(() => signInWithGoogle(NoParam()));
+      yield* _signInOrSignUpEitherHandler(() => signInWithGoogle(NoParam()));
     } else if (event is SignOutWithGoogleEvent) {
       yield LoadingState();
 
@@ -67,7 +67,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     } else if (event is SignInWithEmailAndPasswordEvent) {
       yield LoadingState();
 
-      yield* _signInOSignUpEitherHandler(
+      yield* _signInOrSignUpEitherHandler(
         () => signInWithEmailAndPassword(
           LoginParams(email: event.email, password: event.password),
         ),
@@ -75,10 +75,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     } else if (event is SignUpWithEmailAndPasswordEvent) {
       yield LoadingState();
 
-      yield* _signInOSignUpEitherHandler(
-        () => signUpWithEmailAndPassword(
-          LoginParams(email: event.email, password: event.password),
-        ),
+      yield* _signInOrSignUpEitherHandler(
+        () => signUpWithEmailAndPassword(event.user),
       );
     } else if (event is UpdateAccountInfoEvent) {
       final updateAccountEither = await updateAccountInfo(event.user);
@@ -104,7 +102,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-  Stream<LoginState> _signInOSignUpEitherHandler(usecase) async* {
+  Stream<LoginState> _signInOrSignUpEitherHandler(usecase) async* {
     final signInOrSignUpEither = await usecase();
 
     yield signInOrSignUpEither.fold(

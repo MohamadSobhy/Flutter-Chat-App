@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:chat_app/core/error/exceptions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meta/meta.dart';
 
@@ -31,10 +34,7 @@ abstract class LoginRemoteDataSource {
   /// to perform signing up with email and password.
   ///
   /// Throws a [ServerException] for all error cases.
-  Future<UserModel> signUpWithEmailAndPassword(
-    String email,
-    String password,
-  );
+  Future<UserModel> signUpWithEmailAndPassword(UserModel user);
 
   //common actions
 
@@ -55,8 +55,10 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
   final GoogleSignIn googleSignIn;
   final FirebaseAuth firebaseAuth;
   final Firestore firestoreInstance;
+  final FirebaseStorage storage;
 
   LoginRemoteDataSourceImpl({
+    @required this.storage,
     @required this.firestoreInstance,
     @required this.firebaseAuth,
     @required this.googleSignIn,
@@ -131,7 +133,7 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
 
       return userModel;
     } catch (error) {
-      throw ServerException(message: error.toString());
+      throw ServerException(message: error.toString().split(',')[1]);
     }
   }
 
@@ -143,28 +145,22 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
   }
 
   @override
-  Future<UserModel> signUpWithEmailAndPassword(
-      String email, String password) async {
+  Future<UserModel> signUpWithEmailAndPassword(UserModel user) async {
     try {
       final authResult = await firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
+        email: user.email,
+        password: user.password,
       );
 
-      final userData = UserModel(
-        id: authResult.user.uid,
-        displayName: authResult.user.displayName,
-        email: authResult.user.email,
-        password: password,
-        phoneNumber: authResult.user.phoneNumber,
-        photoUrl: authResult.user.photoUrl,
-      );
+      user.id = authResult.user.uid;
 
-      _storeUserDataOnServer(userData);
+      if (user.photoUrl != null) await _uploadUserImageToServer(user);
 
-      return userData;
+      _storeUserDataOnServer(user);
+
+      return user;
     } catch (error) {
-      throw ServerException(message: error.toString());
+      throw ServerException(message: error.toString().split(',')[1]);
     }
   }
 
@@ -212,5 +208,15 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
 
   Future<void> _deleteUserDataFromServer(UserModel user) async {
     await firestoreInstance.collection('users').document(user.id).delete();
+  }
+
+  Future<void> _uploadUserImageToServer(UserModel user) async {
+    final newImage = File(user.photoUrl);
+
+    StorageUploadTask task =
+        storage.ref().child(user.id + '.png').putFile(newImage);
+
+    final taskSnapshot = await task.onComplete;
+    user.photoUrl = await taskSnapshot.ref.getDownloadURL();
   }
 }

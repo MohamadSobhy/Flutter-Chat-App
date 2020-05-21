@@ -43,7 +43,9 @@ class CustomSnackBar extends StatelessWidget {
               padding: const EdgeInsets.all(10.0),
               child: Text(
                 message,
-                style: Theme.of(context).textTheme.title,
+                style: Theme.of(context).textTheme.title.copyWith(
+                      color: isSuccessful ? Colors.blue : Colors.deepOrange,
+                    ),
               ),
             ),
           ),

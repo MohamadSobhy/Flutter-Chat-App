@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat_app/features/login/domain/entities/user.dart';
+import 'package:chat_app/src/widgets/custom_app_bar_action.dart';
+import 'package:chat_app/src/widgets/user_image_avatar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +22,12 @@ class ChatPage extends StatefulWidget {
 
   final String peerId;
   final String peerName;
+  final String peerImageUrl;
 
-  const ChatPage({@required this.peerId, @required this.peerName});
+  const ChatPage(
+      {@required this.peerId,
+      @required this.peerName,
+      @required this.peerImageUrl});
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -196,8 +203,36 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(widget.peerName),
         elevation: 0.0,
+        backgroundColor: Colors.transparent,
+        title: FittedBox(
+          child: Column(
+            children: [
+              UserImageAvatar(
+                imageUrl: widget.peerImageUrl,
+                height: 30.0,
+                width: 30.0,
+                onTap: null,
+              ),
+              Text(
+                widget.peerName,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyText1
+                    .copyWith(color: Theme.of(context).primaryColor),
+              ),
+              SizedBox(
+                height: 5,
+              )
+            ],
+          ),
+        ),
+        leading: CustomAppBarAction(
+          icon: Icons.arrow_back_ios,
+          onActionPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
       ),
       body: _buildChatBody(),
     );

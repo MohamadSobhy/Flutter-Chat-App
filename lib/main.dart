@@ -4,6 +4,7 @@ import 'package:chat_app/src/pages/image_message_view.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sailor/sailor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -37,6 +38,11 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.deepOrange,
           splashColor: Color(0xDDFDEDF3),
+          textTheme: TextTheme(
+            title: GoogleFonts.aBeeZee(fontWeight: FontWeight.bold),
+            body1: GoogleFonts.aBeeZee(),
+            body2: GoogleFonts.aBeeZee(),
+          ),
         ),
         home: BlocListener<LoginBloc, LoginState>(
           listener: (ctx, state) {
@@ -131,6 +137,7 @@ class Routes {
         builder: (_, args, params) => ChatPage(
           peerId: params.param('peerId'),
           peerName: params.param('peerName'),
+          peerImageUrl: params.param('peerImageUrl'),
         ),
         params: [
           SailorParam(
@@ -140,6 +147,11 @@ class Routes {
           ),
           SailorParam(
             name: 'peerName',
+            defaultValue: '',
+            isRequired: true,
+          ),
+          SailorParam(
+            name: 'peerImageUrl',
             defaultValue: '',
             isRequired: true,
           ),

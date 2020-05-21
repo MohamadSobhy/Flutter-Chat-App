@@ -25,7 +25,7 @@ class LoginRepositoryImpl implements LoginRepository {
 
   @override
   Future<Either<Failure, User>> signInWithGoogle() async {
-    return await _signInOrSignOut(() => remoteDataSource.signInWithGoogle());
+    return await _signInOrSignUp(() => remoteDataSource.signInWithGoogle());
   }
 
   @override
@@ -55,16 +55,15 @@ class LoginRepositoryImpl implements LoginRepository {
   @override
   Future<Either<Failure, User>> signInWithEmailAndPassword(
       String email, String password) async {
-    return await _signInOrSignOut(
+    return await _signInOrSignUp(
       () => remoteDataSource.signInWithEmailAndPassword(email, password),
     );
   }
 
   @override
-  Future<Either<Failure, User>> signUpWithEmailAndPassword(
-      String email, String password) async {
-    return await _signInOrSignOut(
-      () => remoteDataSource.signUpWithEmailAndPassword(email, password),
+  Future<Either<Failure, User>> signUpWithEmailAndPassword(User user) async {
+    return await _signInOrSignUp(
+      () => remoteDataSource.signUpWithEmailAndPassword(user),
     );
   }
 
@@ -84,7 +83,7 @@ class LoginRepositoryImpl implements LoginRepository {
     });
   }
 
-  Future<Either<Failure, User>> _signInOrSignOut(
+  Future<Either<Failure, User>> _signInOrSignUp(
       _SignInOrSignUpMethod signInOrSignOut) async {
     if (await networkInfo.isConnected) {
       try {
@@ -94,7 +93,7 @@ class LoginRepositoryImpl implements LoginRepository {
 
         return Right(user);
       } on ServerException catch (error) {
-        return Left(ServerFailure(message: error.message));
+        return Left(ServerFailure(message: error.message.split('.')[0]));
       }
     } else {
       return Left(NetworkFailure(message: NO_INTERNET_CONNECTION));

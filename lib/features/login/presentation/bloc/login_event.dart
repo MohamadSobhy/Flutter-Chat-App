@@ -23,16 +23,12 @@ class SignInWithEmailAndPasswordEvent extends LoginEvent {
 }
 
 class SignUpWithEmailAndPasswordEvent extends LoginEvent {
-  final String email;
-  final String password;
+  final User user;
 
-  SignUpWithEmailAndPasswordEvent({
-    @required this.email,
-    @required this.password,
-  });
+  SignUpWithEmailAndPasswordEvent({@required this.user});
 
   @override
-  List<Object> get props => [email, password];
+  List<Object> get props => [user];
 }
 
 class UpdateAccountInfoEvent extends LoginEvent {

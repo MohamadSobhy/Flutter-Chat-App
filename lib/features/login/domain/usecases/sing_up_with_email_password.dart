@@ -7,13 +7,13 @@ import '../entities/user.dart';
 import '../repositories/login_repository.dart';
 import 'sing_in_with_email_password.dart';
 
-class SignUpWithEmailAndPassword extends UseCase<User, LoginParams> {
+class SignUpWithEmailAndPassword extends UseCase<User, User> {
   final LoginRepository repository;
 
   SignUpWithEmailAndPassword({@required this.repository});
 
   @override
-  Future<Either<Failure, User>> call(LoginParams params) {
-    return repository.signUpWithEmailAndPassword(params.email, params.password);
+  Future<Either<Failure, User>> call(User user) {
+    return repository.signUpWithEmailAndPassword(user);
   }
 }
