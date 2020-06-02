@@ -27,9 +27,12 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: UserImageAvatar(
-          imageUrl: serviceLocator<User>().photoUrl,
-          onTap: _openProfilePage,
+        title: Hero(
+          tag: 'user-avatar',
+          child: UserImageAvatar(
+            imageUrl: serviceLocator<User>().photoUrl,
+            onTap: _openProfilePage,
+          ),
         ),
         elevation: 0.0,
         backgroundColor: Colors.transparent,
