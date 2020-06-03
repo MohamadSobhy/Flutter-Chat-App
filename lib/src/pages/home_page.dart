@@ -1,23 +1,15 @@
-import 'dart:convert';
-
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chat_app/features/login/domain/entities/user.dart';
-import 'package:chat_app/features/login/presentation/bloc/login_bloc.dart';
-import 'package:chat_app/features/login/presentation/pages/login_page.dart';
-import 'package:chat_app/injection_container.dart';
-import 'package:chat_app/src/widgets/custom_app_bar_action.dart';
-import 'package:chat_app/src/widgets/user_image_avatar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/login/domain/entities/user.dart';
+import '../../features/login/presentation/bloc/login_bloc.dart';
+import '../../features/login/presentation/pages/profile_page.dart';
+import '../../injection_container.dart';
 import '../../main.dart';
+import '../widgets/custom_app_bar_action.dart';
+import '../widgets/user_image_avatar.dart';
 import '../widgets/user_item.dart';
-import './profile_page.dart';
 
 class HomePage extends StatelessWidget {
   static const String routeName = '/dashboard';

@@ -6,6 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/error/exceptions.dart';
 import '../models/user_model.dart';
 
+enum LoginMethod {
+  emailAndPassword,
+  google,
+  facebook,
+}
+
 abstract class LoginLocalDataSource {
   /// Stores the user data json string into shared preferences
   ///
@@ -19,6 +25,12 @@ abstract class LoginLocalDataSource {
 
   /// Deletes the cahced User data from preferences.
   Future<void> clear();
+
+  // Stores the current login method on preferences.
+  Future<void> storeLoginMethod(LoginMethod loginMethod);
+
+  //returns the current login method.
+  LoginMethod getLoginMethod();
 }
 
 class LoginLocalDataSourceImpl implements LoginLocalDataSource {
@@ -52,5 +64,16 @@ class LoginLocalDataSourceImpl implements LoginLocalDataSource {
   @override
   Future<void> clear() async {
     await preferences.remove('user');
+    await preferences.remove('login_method');
+  }
+
+  @override
+  Future<void> storeLoginMethod(LoginMethod loginMethod) async {
+    await preferences.setInt('login_method', loginMethod.index);
+  }
+
+  @override
+  LoginMethod getLoginMethod() {
+    return LoginMethod.values[preferences.getInt('login_method')];
   }
 }

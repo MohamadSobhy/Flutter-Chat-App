@@ -1,16 +1,13 @@
-import 'dart:io';
-
-import 'package:chat_app/features/login/data/models/user_model.dart';
-import 'package:chat_app/features/login/domain/entities/user.dart';
-import 'package:chat_app/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:image_picker/image_picker.dart';
 
+import '../../../../main.dart';
 import '../../../../src/widgets/custom_app_bar_action.dart';
 import '../bloc/login_bloc.dart';
 import '../widgets/custom_input_field.dart';
+import '../widgets/custom_submit_button.dart';
+import 'update_info_page.dart';
 
 class LoginPage extends StatefulWidget {
   static const String routeName = '/login';
@@ -22,11 +19,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _phoneNumberController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
-
-  bool isSigningIn = true;
-  String _selectedImagePath;
 
   @override
   Widget build(BuildContext context) {
@@ -39,17 +31,16 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 children: [
                   Text(
-                    isSigningIn ? 'Login' : 'Register',
+                    'Login',
                     style: Theme.of(context)
                         .textTheme
                         .title
-                        .copyWith(fontSize: 30.0),
+                        .copyWith(fontSize: 35.0),
                   ),
                   const SizedBox(
                     height: 15.0,
                   ),
-                  isSigningIn ? _getLoginPageBody(context) : Container(),
-                  !isSigningIn ? _buildImageAvatarWithName() : Container(),
+                  _buildLoginWithSocialMediaBody(context),
                   const SizedBox(
                     height: 15.0,
                   ),
@@ -72,7 +63,6 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(
                     height: 20.0,
                   ),
-                  !isSigningIn ? _buildRegisterPageBody() : Container(),
                   _buildLoginButton(context),
                   SizedBox(
                     height: 15.0,
@@ -81,18 +71,12 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        isSigningIn
-                            ? 'Don\'t have an account? '
-                            : 'Have an account? ',
+                        'Don\'t have an account? ',
                       ),
                       InkWell(
-                        onTap: () {
-                          setState(() {
-                            isSigningIn = !isSigningIn;
-                          });
-                        },
+                        onTap: _openRegisterPage,
                         child: Text(
-                          isSigningIn ? 'Register' : 'Sign in',
+                          'Register',
                           style: Theme.of(context).textTheme.bodyText1.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.deepOrange,
@@ -110,29 +94,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildImageAvatarWithName() {
-    return Column(
-      children: [
-        InkWell(
-          onTap: _chooseImageFromGallery,
-          child: CircleAvatar(
-            radius: 80.0,
-            backgroundColor: Colors.transparent,
-            backgroundImage: _selectedImagePath != null
-                ? FileImage(File(_selectedImagePath))
-                : AssetImage('assets/images/icon_user.png'),
-          ),
-        ),
-        CustomInputField(
-          label: 'Name',
-          controller: _nameController,
-          padding: 0.0,
-        ),
-      ],
-    );
-  }
-
-  Widget _getLoginPageBody(context) {
+  Widget _buildLoginWithSocialMediaBody(context) {
     final screenSize = MediaQuery.of(context).size;
     return Column(
       children: [
@@ -147,22 +109,18 @@ class _LoginPageState extends State<LoginPage> {
           height: 15.0,
         ),
         Container(
-          height: screenSize.height * 0.12,
+          height: screenSize.height * 0.08,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Expanded(
-                child: CustomAppBarAction(
-                  icon: FontAwesomeIcons.facebookF,
-                  iconColor: Colors.blue,
-                  onActionPressed: () {},
-                ),
+              CustomAppBarAction(
+                icon: FontAwesomeIcons.facebookF,
+                iconColor: Colors.blue,
+                onActionPressed: () {},
               ),
-              Expanded(
-                child: CustomAppBarAction(
-                  icon: FontAwesomeIcons.google,
-                  onActionPressed: () => _singInUsingGoogle(context),
-                ),
+              CustomAppBarAction(
+                icon: FontAwesomeIcons.google,
+                onActionPressed: () => _singInUsingGoogle(context),
               )
             ],
           ),
@@ -177,79 +135,29 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildRegisterPageBody() {
-    return Column(
-      children: [
-        CustomInputField(
-          label: 'Phone Number',
-          padding: 0.0,
-          controller: _phoneNumberController,
-          keyboardType: TextInputType.phone,
-        ),
-      ],
+  Widget _buildLoginButton(context) {
+    return CustomSubmitButton(
+      label: 'Login',
+      onSubmit: () => _loginWithEmailAndPassword(context),
     );
   }
 
-  Widget _buildLoginButton(context) {
-    return Container(
-      height: 60.0,
-      width: MediaQuery.of(context).size.width,
-      margin: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 15.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15.0),
-        color: Theme.of(context).primaryColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey[200],
-            spreadRadius: 2,
-          )
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(15.0),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => _loginWithEmailAndPassword(context),
-            child: Center(
-              child: Text(
-                isSigningIn ? 'Sign in' : 'Register',
-                style: Theme.of(context).textTheme.title,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+  void _openRegisterPage() {
+    Routes.sailor.navigate(UpdateInfoPage.routeName, params: {
+      'isSigningUp': true,
+    });
   }
 
   void _singInUsingGoogle(BuildContext context) async {
     BlocProvider.of<LoginBloc>(context).add(SignInWithGoogleEvent());
   }
 
-  void _chooseImageFromGallery() async {
-    _selectedImagePath =
-        (await ImagePicker.pickImage(source: ImageSource.gallery)).path;
-    setState(() {});
-  }
-
   void _loginWithEmailAndPassword(context) {
     String email = _emailController.text.trim();
     String password = _passwordController.text;
 
-    final userData = UserModel(
-      id: 'TEMP',
-      displayName: _nameController.text.trim(),
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-      phoneNumber: _phoneNumberController.text.trim(),
-      photoUrl: _selectedImagePath,
-    );
-
     BlocProvider.of<LoginBloc>(context).add(
-      isSigningIn
-          ? SignInWithEmailAndPasswordEvent(email: email, password: password)
-          : SignUpWithEmailAndPasswordEvent(user: userData),
+      SignInWithEmailAndPasswordEvent(email: email, password: password),
     );
   }
 }

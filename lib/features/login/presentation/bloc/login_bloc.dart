@@ -79,6 +79,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         () => signUpWithEmailAndPassword(event.user),
       );
     } else if (event is UpdateAccountInfoEvent) {
+      yield LoadingState();
       final updateAccountEither = await updateAccountInfo(event.user);
 
       yield updateAccountEither.fold(

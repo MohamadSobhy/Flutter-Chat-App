@@ -1,20 +1,20 @@
-import 'package:chat_app/features/login/presentation/pages/loading_page.dart';
-import 'package:chat_app/injection_container.dart';
-import 'package:chat_app/src/pages/image_message_view.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sailor/sailor.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'features/login/domain/entities/user.dart';
 import 'features/login/presentation/bloc/login_bloc.dart';
+import 'features/login/presentation/pages/loading_page.dart';
 import 'features/login/presentation/pages/login_page.dart';
+import 'features/login/presentation/pages/profile_page.dart';
+import 'features/login/presentation/pages/update_info_page.dart';
 import 'features/login/presentation/widgets/custom_snackbar.dart';
+import 'injection_container.dart';
 import 'src/pages/chat_page.dart';
 import 'src/pages/home_page.dart';
-import 'src/pages/profile_page.dart';
+import 'src/pages/image_message_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,7 +75,12 @@ class MyApp extends StatelessWidget {
               } else if (state is LoadingState) {
                 return LoadingPage();
               } else if (state is AlertMessageState) {
-                return LoginPage();
+                try {
+                  final currentUser = serviceLocator<User>();
+                  return HomePage();
+                } catch (error) {
+                  return LoginPage();
+                }
               } else if (state is ErrorState) {
                 try {
                   final currentUser = serviceLocator<User>();
@@ -103,14 +108,15 @@ class MyApp extends StatelessWidget {
     bool isSuccessful,
   }) {
     Flushbar(
-      margin: const EdgeInsets.all(8.0),
-      borderRadius: 10.0,
-      padding: const EdgeInsets.all(0.0),
-      messageText: CustomSnackBar(
-        message: message,
-        isSuccessful: isSuccessful,
-      ),
-      duration: Duration(seconds: 3),
+      //margin: const EdgeInsets.all(8.0),
+      //borderRadius: 10.0,
+      //padding: const EdgeInsets.all(0.0),
+      // messageText: CustomSnackBar(
+      //   message: message,
+      //   isSuccessful: isSuccessful,
+      // ),
+      message: message,
+      duration: Duration(seconds: 2),
     ).show(context);
   }
 }
@@ -169,6 +175,16 @@ class Routes {
           ),
         ],
       ),
+      SailorRoute(
+          name: UpdateInfoPage.routeName,
+          builder: (_, args, params) {
+            return UpdateInfoPage(
+              isSigningUp: params.param('isSigningUp'),
+            );
+          },
+          params: [
+            SailorParam(name: 'isSigningUp'),
+          ]),
     ]);
   }
 }

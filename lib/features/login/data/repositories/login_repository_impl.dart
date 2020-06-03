@@ -25,7 +25,10 @@ class LoginRepositoryImpl implements LoginRepository {
 
   @override
   Future<Either<Failure, User>> signInWithGoogle() async {
-    return await _signInOrSignUp(() => remoteDataSource.signInWithGoogle());
+    return await _signInOrSignUp(() {
+      localDataSource.storeLoginMethod(LoginMethod.google);
+      return remoteDataSource.signInWithGoogle();
+    });
   }
 
   @override
@@ -46,9 +49,19 @@ class LoginRepositoryImpl implements LoginRepository {
   Future<Either<Failure, User>> getLoggedInUserData() async {
     try {
       final userModel = await localDataSource.getUserData();
+
+      //login again to link app to firebase
+      if (localDataSource.getLoginMethod() == LoginMethod.emailAndPassword)
+        remoteDataSource.signInWithEmailAndPassword(
+          userModel.email,
+          userModel.password,
+        );
+
       return Right(userModel);
     } on UserNotFoundException catch (error) {
       return Left(UserNotFoundFailure(message: error.message));
+    } on ServerException catch (error) {
+      return Left(ServerFailure(message: error.message));
     }
   }
 
@@ -56,21 +69,28 @@ class LoginRepositoryImpl implements LoginRepository {
   Future<Either<Failure, User>> signInWithEmailAndPassword(
       String email, String password) async {
     return await _signInOrSignUp(
-      () => remoteDataSource.signInWithEmailAndPassword(email, password),
+      () {
+        localDataSource.storeLoginMethod(LoginMethod.emailAndPassword);
+        return remoteDataSource.signInWithEmailAndPassword(email, password);
+      },
     );
   }
 
   @override
   Future<Either<Failure, User>> signUpWithEmailAndPassword(User user) async {
     return await _signInOrSignUp(
-      () => remoteDataSource.signUpWithEmailAndPassword(user),
+      () {
+        localDataSource.storeLoginMethod(LoginMethod.emailAndPassword);
+        return remoteDataSource.signUpWithEmailAndPassword(user);
+      },
     );
   }
 
   @override
   Future<Either<Failure, String>> updateAccountInfo(User user) async {
     return await _updateOrDeleteAccount(() {
-      localDataSource.cacheUserData(user);
+      //localDataSource.cacheUserData(user);
+      _tempUser = user;
       return remoteDataSource.updateAccountInfo(user);
     });
   }
@@ -100,12 +120,18 @@ class LoginRepositoryImpl implements LoginRepository {
     }
   }
 
+  User _tempUser;
   Future<Either<Failure, String>> _updateOrDeleteAccount(
     _UpdateOrDeleteAccountMethod updateOrDeleteAccount,
   ) async {
     if (await networkInfo.isConnected) {
       try {
         final result = await updateOrDeleteAccount();
+
+        if (_tempUser != null) {
+          await localDataSource.cacheUserData(_tempUser);
+          _tempUser = null;
+        }
 
         return Right(result);
       } on ServerException catch (error) {

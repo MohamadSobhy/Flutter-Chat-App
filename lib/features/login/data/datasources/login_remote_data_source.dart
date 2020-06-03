@@ -1,12 +1,16 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat_app/core/error/exceptions.dart';
+import 'package:chat_app/features/login/data/datasources/login_local_data_source.dart';
+import 'package:chat_app/injection_container.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meta/meta.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/user_model.dart';
 
@@ -183,7 +187,21 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
     try {
       final currentUser = await firebaseAuth.currentUser();
 
-      currentUser.updatePassword(user.password);
+      final preferences = serviceLocator<SharedPreferences>();
+      if (LoginMethod.values[preferences.getInt('login_method')] ==
+          LoginMethod.emailAndPassword) {
+        await currentUser.updatePassword(user.password);
+        //await firebaseAuth.signInWithEmailAndPassword(
+        //  email: user.email, password: user.password);
+      }
+
+      //check whether the user choosed a new image or not.
+      final isImageChanged = user.photoUrl.split(' ')[1];
+      user.photoUrl = user.photoUrl.split(' ')[0];
+      if (isImageChanged == '1') {
+        await _uploadUserImageToServer(user);
+      }
+      preferences.setString('user', json.encode(user.toMap()));
 
       await _updateUserDataOnServer(user);
       return 'Done: Account updated successfully.';
@@ -218,5 +236,6 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
 
     final taskSnapshot = await task.onComplete;
     user.photoUrl = await taskSnapshot.ref.getDownloadURL();
+    print(user.photoUrl);
   }
 }

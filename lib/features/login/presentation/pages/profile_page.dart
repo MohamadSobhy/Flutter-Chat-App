@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/features/login/data/models/user_model.dart';
 import 'package:chat_app/features/login/domain/entities/user.dart';
+import 'package:chat_app/features/login/presentation/pages/update_info_page.dart';
 import 'package:chat_app/injection_container.dart';
 import 'package:chat_app/main.dart';
 import 'package:chat_app/src/pages/image_message_view.dart';
@@ -21,10 +22,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final _userNameController = TextEditingController();
-
-  final _phoneNumberController = TextEditingController();
-
   UserModel user;
 
   @override
@@ -64,7 +61,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: CustomAppBarAction(
                 height: 45.0,
                 icon: Icons.edit,
-                onActionPressed: () {},
+                onActionPressed: _goToEditProfileScreen,
               ),
             ),
             Positioned(
@@ -168,8 +165,9 @@ class _ProfilePageState extends State<ProfilePage> {
           child: GestureDetector(
             onTap: _viewUserImageOnFullScreen,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(60.0),
+              borderRadius: BorderRadius.circular(100.0),
               child: CachedNetworkImage(
+                width: 160,
                 height: MediaQuery.of(context).size.width * 0.4,
                 imageUrl: user.photoUrl,
                 fit: BoxFit.cover,
@@ -187,44 +185,18 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  void _chooseImageFromGellary() async {
-    final newImage = await ImagePicker.pickImage(source: ImageSource.gallery);
-
-    if (newImage != null) {
-      FirebaseStorage.instance
-          .ref()
-          .child(user.id + '.png')
-          .putFile(newImage)
-          .onComplete
-          .then((value) {
-        value.ref.getDownloadURL().then((url) async {
-          user.photoUrl = url;
-
-          await _updateUserData();
-          setState(() {});
-        });
-      });
-    }
-  }
-
-  Future<void> _updateUserData() async {
-    UserModel accountData = UserModel(
-      id: user.id,
-      email: user.email,
-      displayName: _userNameController.text.trim(),
-      phoneNumber: _phoneNumberController.text.trim(),
-      photoUrl: user.photoUrl,
-      password: user.password,
-    );
-
-    Firestore.instance
-        .collection('users')
-        .document(user.id)
-        .updateData(accountData.toMap());
-
-    await (await SharedPreferences.getInstance())
-      ..clear()
-      ..setString('userData', json.encode(accountData));
+  void _goToEditProfileScreen() {
+    Routes.sailor.navigate(UpdateInfoPage.routeName, params: {
+      'isSigningUp': null,
+    }).then((value) {
+      user = UserModel.fromJson(
+        json.decode(
+          serviceLocator<SharedPreferences>().getString('user'),
+        ),
+      );
+      setState(() {});
+      print('refresh');
+    });
   }
 
   void _goBack() {
