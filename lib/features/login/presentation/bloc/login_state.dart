@@ -45,3 +45,13 @@ class AlertMessageState extends LoginState {
   @override
   List<Object> get props => [message];
 }
+
+class AccountDeletedState extends LoginState {
+  @override
+  List<Object> get props => [];
+}
+
+class SignedUpWithEmailState extends LoginState {
+  @override
+  List<Object> get props => [];
+}

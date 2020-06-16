@@ -1,10 +1,6 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chat_app/features/login/domain/entities/user.dart';
-import 'package:chat_app/features/login/presentation/pages/profile_page.dart';
-import 'package:chat_app/src/widgets/custom_app_bar_action.dart';
-import 'package:chat_app/src/widgets/user_image_avatar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -12,10 +8,13 @@ import 'package:intl/intl.dart' as intl;
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../features/login/presentation/pages/profile_page.dart';
 import '../../injection_container.dart';
 import '../../main.dart';
 import '../models/message.dart';
+import '../widgets/custom_app_bar_action.dart';
 import '../widgets/empty_chat_message.dart';
+import '../widgets/user_image_avatar.dart';
 import 'image_message_view.dart';
 
 class ChatPage extends StatefulWidget {

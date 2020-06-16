@@ -3,15 +3,19 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat_app/features/login/data/datasources/login_local_data_source.dart';
+import 'package:chat_app/features/login/presentation/pages/login_page.dart';
+import 'package:chat_app/src/pages/home_page.dart';
 import 'package:chat_app/src/widgets/custom_app_bar_action.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:sailor/sailor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../injection_container.dart';
+import '../../../../main.dart';
 import '../../data/models/user_model.dart';
 import '../bloc/login_bloc.dart';
 import '../widgets/custom_input_field.dart';
@@ -37,12 +41,50 @@ class _UpdateInfoPageState extends State<UpdateInfoPage> {
   bool _isLoggedInWithEmailAndPassword;
   UserModel userData;
   bool _isLoading = false;
+  LoginBloc bloc;
 
   @override
   void initState() {
     _initialzeContentWithUserData();
 
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    bloc = BlocProvider.of<LoginBloc>(context);
+    if (subscription != null) subscription.cancel();
+    subscription = bloc.listen((state) {
+      if (state is AlertMessageState || state is ErrorState) {
+        _isLoading = false;
+      } else if (state is LoadingState) {
+        print('start loading');
+        _isLoading = true;
+      } else if (state is AccountDeletedState) {
+        _isLoading = false;
+        Routes.sailor.navigate(
+          LoginPage.routeName,
+          navigationType: NavigationType.pushAndRemoveUntil,
+          removeUntilPredicate: (_) => false,
+        );
+      } else if (state is LoggedOutState) {
+        _isLoading = false;
+        Routes.sailor.navigate(
+          LoginPage.routeName,
+          navigationType: NavigationType.pushAndRemoveUntil,
+          removeUntilPredicate: (_) => false,
+        );
+      } else if (state is SignedUpWithEmailState) {
+        _isLoading = false;
+        Routes.sailor.navigate(
+          HomePage.routeName,
+          navigationType: NavigationType.pushAndRemoveUntil,
+          removeUntilPredicate: (_) => false,
+        );
+      }
+      setState(() {});
+    });
+    super.didChangeDependencies();
   }
 
   void _initialzeContentWithUserData() {
@@ -160,7 +202,16 @@ class _UpdateInfoPageState extends State<UpdateInfoPage> {
                                   padding: 0.0,
                                 )
                               : Container()
-                          : Container(),
+                          : widget.isSigningUp != null
+                              ? CustomInputField(
+                                  controller: _passwordController,
+                                  label: 'Password',
+                                  obsecureText: true,
+                                  keyboardType: TextInputType.visiblePassword,
+                                  suffixIcon: Icons.remove_red_eye,
+                                  padding: 0.0,
+                                )
+                              : Container(),
                       const SizedBox(
                         height: 20.0,
                       ),
@@ -181,7 +232,7 @@ class _UpdateInfoPageState extends State<UpdateInfoPage> {
                           : Container(),
                       widget.isSigningUp != null
                           ? _buildBackToSignInRow(context)
-                          : Container(),
+                          : _buildDeleteAccountRow(),
                       SizedBox(
                         height: 15.0,
                       ),
@@ -233,6 +284,54 @@ class _UpdateInfoPageState extends State<UpdateInfoPage> {
     );
   }
 
+  Widget _buildDeleteAccountRow() {
+    return FlatButton(
+      onPressed: _deleteUserAccount,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.delete,
+            color: Theme.of(context).primaryColor,
+          ),
+          Text('Delete Account',
+              style: Theme.of(context).textTheme.bodyText1.copyWith(
+                  color: Theme.of(context).primaryColor,
+                  fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  void _deleteUserAccount() async {
+    final deleteOptionSelected = await _showDeleteAccountDialog();
+    if (deleteOptionSelected) {
+      setState(() {
+        _isLoading = true;
+      });
+      bloc.add(DeleteAccountInfoEvent(user: userData));
+    }
+  }
+
+  Future<bool> _showDeleteAccountDialog() {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Are you sure?'),
+        actions: [
+          FlatButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Yes, Delete Account.'),
+          ),
+          FlatButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _goBack() {
     Navigator.of(context).pop();
   }
@@ -257,7 +356,11 @@ class _UpdateInfoPageState extends State<UpdateInfoPage> {
       photoUrl: _selectedImagePath,
     );
 
-    BlocProvider.of<LoginBloc>(context).add(
+    setState(() {
+      _isLoading = true;
+    });
+
+    bloc.add(
       SignUpWithEmailAndPasswordEvent(user: newUser),
     );
   }
@@ -271,23 +374,12 @@ class _UpdateInfoPageState extends State<UpdateInfoPage> {
       phoneNumber: _phoneNumberController.text.trim(),
       photoUrl: _isNewImageChoosed
           ? _selectedImagePath + ' 1'
-          : userData.photoUrl + ' 0',
+          : userData.photoUrl != null ? userData.photoUrl + ' 0' : null,
     );
     setState(() {
       _isLoading = true;
     });
 
-    final bloc = BlocProvider.of<LoginBloc>(context);
-    if (subscription != null) subscription.cancel();
-    subscription = bloc.listen((state) {
-      if (state is AlertMessageState || state is ErrorState) {
-        _isLoading = false;
-      } else if (state is LoadingState) {
-        print('start loading');
-        _isLoading = true;
-      }
-      setState(() {});
-    });
     bloc.add(
       UpdateAccountInfoEvent(user: newUser),
     );

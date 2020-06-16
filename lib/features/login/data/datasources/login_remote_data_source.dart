@@ -197,10 +197,12 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
       }
 
       //check whether the user choosed a new image or not.
-      final isImageChanged = user.photoUrl.split(' ')[1];
-      user.photoUrl = user.photoUrl.split(' ')[0];
-      if (isImageChanged == '1') {
-        await _uploadUserImageToServer(user);
+      if (user.photoUrl != null) {
+        final isImageChanged = user.photoUrl.split(' ')[1];
+        user.photoUrl = user.photoUrl.split(' ')[0];
+        if (isImageChanged == '1') {
+          await _uploadUserImageToServer(user);
+        }
       }
       preferences.setString('user', json.encode(user.toMap()));
 
