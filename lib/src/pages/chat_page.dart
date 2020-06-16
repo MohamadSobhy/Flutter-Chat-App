@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/features/login/domain/entities/user.dart';
+import 'package:chat_app/features/login/presentation/pages/profile_page.dart';
 import 'package:chat_app/src/widgets/custom_app_bar_action.dart';
 import 'package:chat_app/src/widgets/user_image_avatar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -212,7 +213,7 @@ class _ChatPageState extends State<ChatPage> {
                 imageUrl: widget.peerImageUrl,
                 height: 30.0,
                 width: 30.0,
-                onTap: null,
+                onTap: _openPeerProfile,
               ),
               Text(
                 widget.peerName,
@@ -236,6 +237,12 @@ class _ChatPageState extends State<ChatPage> {
       ),
       body: _buildChatBody(),
     );
+  }
+
+  void _openPeerProfile() {
+    Routes.sailor.navigate(ProfilePage.routeName, params: {
+      'userId': widget.peerId,
+    });
   }
 
   Widget _buildChatBody() {

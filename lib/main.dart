@@ -135,9 +135,10 @@ class Routes {
         builder: (_, args, params) => HomePage(),
       ),
       SailorRoute(
-        name: ProfilePage.routeName,
-        builder: (_, args, params) => ProfilePage(),
-      ),
+          name: ProfilePage.routeName,
+          builder: (_, args, params) =>
+              ProfilePage(userId: params.param('userId')),
+          params: [SailorParam(name: 'userId')]),
       SailorRoute(
         name: ChatPage.routeName,
         builder: (_, args, params) => ChatPage(

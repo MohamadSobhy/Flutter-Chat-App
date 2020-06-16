@@ -191,8 +191,8 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
       if (LoginMethod.values[preferences.getInt('login_method')] ==
           LoginMethod.emailAndPassword) {
         await currentUser.updatePassword(user.password);
-        //await firebaseAuth.signInWithEmailAndPassword(
-        //  email: user.email, password: user.password);
+        await firebaseAuth.signInWithEmailAndPassword(
+            email: user.email, password: user.password);
       }
 
       //check whether the user choosed a new image or not.

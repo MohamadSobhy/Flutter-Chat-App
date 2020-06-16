@@ -22,6 +22,7 @@ class UserImageAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
         color: Colors.grey[200],
+        border: Border.all(width: 0.8, color: Colors.white),
         image: DecorationImage(
           image: imageUrl == null
               ? AssetImage('assets/images/icon_user.png')
