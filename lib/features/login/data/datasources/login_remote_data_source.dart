@@ -89,7 +89,7 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
             .where('id', isEqualTo: user.uid)
             .getDocuments();
 
-        final userData = UserModel(
+        UserModel userData = UserModel(
           id: user.uid,
           displayName: user.displayName,
           email: user.email,
@@ -100,6 +100,10 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
 
         if (result.documents.length == 0) {
           _storeUserDataOnServer(userData);
+        } else {
+          final userDocument = await _getUserDataFromServer(userData.id);
+
+          userData = UserModel.fromJson(userDocument.data);
         }
         return userData;
       }
@@ -131,7 +135,7 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
         password: password,
       );
 
-      final userDocument = await _getUserDataFromServer(authResult);
+      final userDocument = await _getUserDataFromServer(authResult.user.uid);
 
       final userModel = UserModel.fromJson(userDocument.data);
 
@@ -141,11 +145,8 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
     }
   }
 
-  Future<DocumentSnapshot> _getUserDataFromServer(AuthResult authResult) {
-    return firestoreInstance
-        .collection('users')
-        .document(authResult.user.uid)
-        .get();
+  Future<DocumentSnapshot> _getUserDataFromServer(String userID) {
+    return firestoreInstance.collection('users').document(userID).get();
   }
 
   @override
