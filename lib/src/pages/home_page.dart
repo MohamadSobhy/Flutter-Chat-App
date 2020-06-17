@@ -27,9 +27,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    _userPhotoUrl = UserModel.fromJson(
-            json.decode(serviceLocator<SharedPreferences>().getString('user')))
-        .photoUrl;
+    final userJsonString =
+        serviceLocator<SharedPreferences>().getString('user');
+    if (userJsonString != null)
+      _userPhotoUrl = UserModel.fromJson(json.decode(userJsonString)).photoUrl;
     super.initState();
   }
 

@@ -103,6 +103,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         (successMessage) async* {
           yield LoggedOutState();
           yield AlertMessageState(message: successMessage);
+          yield AccountDeletedState();
         },
       );
     }

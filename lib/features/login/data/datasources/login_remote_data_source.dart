@@ -141,7 +141,12 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
 
       return userModel;
     } catch (error) {
-      throw ServerException(message: error.toString().split(',')[1]);
+      String message;
+      if (error.toString().split(',').length > 1)
+        message = error.toString().split(',')[1];
+      else
+        message = error.toString();
+      throw ServerException(message: message);
     }
   }
 
@@ -165,7 +170,12 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
 
       return user;
     } catch (error) {
-      throw ServerException(message: error.toString().split(',')[1]);
+      String message;
+      if (error.toString().split(',').length > 1)
+        message = error.toString().split(',')[1];
+      else
+        message = error.toString();
+      throw ServerException(message: message);
     }
   }
 

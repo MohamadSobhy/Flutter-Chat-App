@@ -62,25 +62,21 @@ class _UpdateInfoPageState extends State<UpdateInfoPage> {
         _isLoading = true;
       } else if (state is AccountDeletedState) {
         _isLoading = false;
-        Routes.sailor.navigate(
-          LoginPage.routeName,
-          navigationType: NavigationType.pushAndRemoveUntil,
-          removeUntilPredicate: (_) => false,
-        );
-      } else if (state is LoggedOutState) {
+        // Routes.sailor.navigate(
+        //   LoginPage.routeName,
+        //   navigationType: NavigationType.pushAndRemoveUntil,
+        //   removeUntilPredicate: (_) => false,
+        // );
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+      if (state is SignedUpWithEmailState) {
         _isLoading = false;
-        Routes.sailor.navigate(
-          LoginPage.routeName,
-          navigationType: NavigationType.pushAndRemoveUntil,
-          removeUntilPredicate: (_) => false,
-        );
-      } else if (state is SignedUpWithEmailState) {
-        _isLoading = false;
-        Routes.sailor.navigate(
-          HomePage.routeName,
-          navigationType: NavigationType.pushAndRemoveUntil,
-          removeUntilPredicate: (_) => false,
-        );
+        Navigator.of(context).pop();
+        // Routes.sailor.navigate(
+        //   HomePage.routeName,
+        //   navigationType: NavigationType.pushAndRemoveUntil,
+        //   removeUntilPredicate: (_) => false,
+        // );
       }
       setState(() {});
     });

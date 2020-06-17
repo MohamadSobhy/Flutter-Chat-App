@@ -38,11 +38,12 @@ class _ProfilePageState extends State<ProfilePage> {
   Stream _getUserDataStream() {
     UserModel user;
     if (widget.userId == null) {
-      user = UserModel.fromJson(
-        json.decode(
-          serviceLocator<SharedPreferences>().getString('user'),
-        ),
-      );
+      final userJsonString =
+          serviceLocator<SharedPreferences>().getString('user');
+      if (userJsonString != null)
+        user = UserModel.fromJson(
+          json.decode(userJsonString),
+        );
       return Stream.value(user);
     } else {
       return serviceLocator<Firestore>()
@@ -232,11 +233,12 @@ class _ProfilePageState extends State<ProfilePage> {
     Routes.sailor.navigate(UpdateInfoPage.routeName, params: {
       'isSigningUp': null,
     }).then((value) {
-      user = UserModel.fromJson(
-        json.decode(
-          serviceLocator<SharedPreferences>().getString('user'),
-        ),
-      );
+      final userJsonString =
+          serviceLocator<SharedPreferences>().getString('user');
+      if (userJsonString != null && userJsonString.isNotEmpty)
+        user = UserModel.fromJson(
+          json.decode(userJsonString),
+        );
       setState(() {});
       print('refresh');
     });

@@ -67,7 +67,8 @@ class MyApp extends StatelessWidget {
                   serviceLocator.registerLazySingleton(() => state.user);
                 } catch (err) {}
                 return HomePage();
-              } else if (state is LoggedOutState) {
+              } else if (state is LoggedOutState ||
+                  state is AccountDeletedState) {
                 serviceLocator.unregister(
                   instance: serviceLocator<User>(),
                 );
