@@ -347,6 +347,13 @@ class _UpdateInfoPageState extends State<UpdateInfoPage> {
   }
 
   void _createAccount(context) {
+    if (!validateInputs()) {
+      Flushbar(
+        message: 'User name is required.',
+        duration: Duration(seconds: 2),
+      ).show(context);
+      return;
+    }
     final newUser = UserModel(
       id: 'TEMP',
       displayName: _nameController.text.trim(),
@@ -366,6 +373,14 @@ class _UpdateInfoPageState extends State<UpdateInfoPage> {
   }
 
   void _updateProfileInfo(context) {
+    if (!validateInputs()) {
+      Flushbar(
+        message: 'User name is required.',
+        duration: Duration(seconds: 2),
+      ).show(context);
+      return;
+    }
+
     final newUser = UserModel(
       id: userData.id,
       displayName: _nameController.text.trim(),
@@ -385,6 +400,11 @@ class _UpdateInfoPageState extends State<UpdateInfoPage> {
     );
 
     //_goBack();
+  }
+
+  bool validateInputs() {
+    return _nameController.text.isNotEmpty; //&&
+    // _phoneNumberController.text.isNotEmpty;
   }
 
   StreamSubscription subscription;

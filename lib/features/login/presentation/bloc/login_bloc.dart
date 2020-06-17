@@ -75,10 +75,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     } else if (event is SignUpWithEmailAndPasswordEvent) {
       yield LoadingState();
 
+      loggedUpUsingEmail = true;
+
       yield* _signInOrSignUpEitherHandler(
         () => signUpWithEmailAndPassword(event.user),
       );
-      yield SignedUpWithEmailState();
+      // if ((await last) is LoggedInState) {
+      //   yield SignedUpWithEmailState();
+      // }
     } else if (event is UpdateAccountInfoEvent) {
       yield LoadingState();
       final updateAccountEither = await updateAccountInfo(event.user);
@@ -104,12 +108,21 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
+  bool loggedUpUsingEmail = false;
   Stream<LoginState> _signInOrSignUpEitherHandler(usecase) async* {
     final signInOrSignUpEither = await usecase();
 
-    yield signInOrSignUpEither.fold(
-      (failure) => ErrorState(message: failure.message),
-      (userData) => LoggedInState(user: userData),
+    yield* signInOrSignUpEither.fold(
+      (failure) async* {
+        yield ErrorState(message: failure.message);
+      },
+      (userData) async* {
+        if (loggedUpUsingEmail) {
+          yield SignedUpWithEmailState();
+          loggedUpUsingEmail = false;
+        }
+        yield LoggedInState(user: userData);
+      },
     );
   }
 }
