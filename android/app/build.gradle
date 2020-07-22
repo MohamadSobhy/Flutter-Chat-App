@@ -73,4 +73,7 @@ dependencies {
 
     //!added for firestore
     implementation 'androidx.multidex:multidex:2.0.1'
+
+    //!Added for Facebook Login
+    implementation 'com.facebook.android:facebook-android-sdk:[5,6)'
 }

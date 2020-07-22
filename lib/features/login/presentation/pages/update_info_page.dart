@@ -109,151 +109,153 @@ class _UpdateInfoPageState extends State<UpdateInfoPage> {
     return ModalProgressHUD(
       inAsyncCall: _isLoading,
       child: Scaffold(
-        body: Stack(
-          children: [
-            Container(
-              color: Theme.of(context).primaryColor,
-              height: screenSize.height,
-              width: screenSize.width,
-            ),
-            Positioned(
-              top: 30.0,
-              child: CustomAppBarAction(
-                height: 45.0,
-                icon: Icons.arrow_back_ios,
-                onActionPressed: _goBack, //_goBack,
-              ),
-            ),
-            widget.isSigningUp == null
-                ? Positioned(
-                    top: 30.0,
-                    right: 0.0,
-                    child: CustomAppBarAction(
-                      height: 45.0,
-                      icon: Icons.done,
-                      onActionPressed: () =>
-                          _updateProfileInfo(context), //_goToEditProfileScreen,
-                    ),
-                  )
-                : Container(),
-            Positioned(
-              top: screenSize.height * 0.25,
-              child: Container(
+        body: SingleChildScrollView(
+          child: Stack(
+            children: [
+              Container(
+                color: Theme.of(context).primaryColor,
+                height: screenSize.height,
                 width: screenSize.width,
-                height: screenSize.height * 0.75,
-                padding: EdgeInsets.only(
-                  top: screenSize.height * 0.10,
-                  left: 15.0,
-                  right: 15.0,
+              ),
+              Positioned(
+                top: 30.0,
+                child: CustomAppBarAction(
+                  height: 45.0,
+                  icon: Icons.arrow_back_ios,
+                  onActionPressed: _goBack, //_goBack,
                 ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).canvasColor,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(35.0),
-                    topRight: Radius.circular(35.0),
+              ),
+              widget.isSigningUp == null
+                  ? Positioned(
+                      top: 30.0,
+                      right: 0.0,
+                      child: CustomAppBarAction(
+                        height: 45.0,
+                        icon: Icons.done,
+                        onActionPressed: () => _updateProfileInfo(
+                            context), //_goToEditProfileScreen,
+                      ),
+                    )
+                  : Container(),
+              Positioned(
+                top: screenSize.height * 0.25,
+                child: Container(
+                  width: screenSize.width,
+                  height: screenSize.height * 0.75,
+                  padding: EdgeInsets.only(
+                    top: screenSize.height * 0.10,
+                    left: 15.0,
+                    right: 15.0,
                   ),
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: screenSize.height * 0.05,
-                      ),
-                      widget.isSigningUp == null
-                          ? Text(userData.email)
-                          : Container(),
-                      SizedBox(
-                        height: screenSize.height * 0.05,
-                      ),
-                      CustomInputField(
-                        label: 'Name',
-                        controller: _nameController,
-                        padding: 0.0,
-                        keyboardType: TextInputType.text,
-                      ),
-                      const SizedBox(
-                        height: 15.0,
-                      ),
-                      widget.isSigningUp != null
-                          ? CustomInputField(
-                              controller: _emailController,
-                              label: 'Email',
-                              padding: 0.0,
-                              keyboardType: TextInputType.emailAddress,
-                            )
-                          : Container(),
-                      widget.isSigningUp != null
-                          ? const SizedBox(
-                              height: 20.0,
-                            )
-                          : Container(),
-                      _isLoggedInWithEmailAndPassword != null
-                          ? _isLoggedInWithEmailAndPassword
-                              ? CustomInputField(
-                                  controller: _passwordController,
-                                  label: 'Password',
-                                  obsecureText: true,
-                                  keyboardType: TextInputType.visiblePassword,
-                                  suffixIcon: Icons.remove_red_eye,
-                                  padding: 0.0,
-                                )
-                              : Container()
-                          : widget.isSigningUp != null
-                              ? CustomInputField(
-                                  controller: _passwordController,
-                                  label: 'Password',
-                                  obsecureText: true,
-                                  keyboardType: TextInputType.visiblePassword,
-                                  suffixIcon: Icons.remove_red_eye,
-                                  padding: 0.0,
-                                )
-                              : Container(),
-                      const SizedBox(
-                        height: 20.0,
-                      ),
-                      CustomInputField(
-                        label: 'Phone Number',
-                        padding: 0.0,
-                        controller: _phoneNumberController,
-                        keyboardType: TextInputType.phone,
-                      ),
-                      const SizedBox(
-                        height: 20.0,
-                      ),
-                      widget.isSigningUp != null
-                          ? CustomSubmitButton(
-                              onSubmit: () => _createAccount(context),
-                              label: 'Register',
-                            )
-                          : Container(),
-                      widget.isSigningUp != null
-                          ? _buildBackToSignInRow(context)
-                          : _buildDeleteAccountRow(),
-                      SizedBox(
-                        height: 15.0,
-                      ),
-                    ],
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).canvasColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(35.0),
+                      topRight: Radius.circular(35.0),
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: screenSize.height * 0.05,
+                        ),
+                        widget.isSigningUp == null
+                            ? Text(userData.email)
+                            : Container(),
+                        SizedBox(
+                          height: screenSize.height * 0.05,
+                        ),
+                        CustomInputField(
+                          label: 'Name',
+                          controller: _nameController,
+                          padding: 0.0,
+                          keyboardType: TextInputType.text,
+                        ),
+                        const SizedBox(
+                          height: 15.0,
+                        ),
+                        widget.isSigningUp != null
+                            ? CustomInputField(
+                                controller: _emailController,
+                                label: 'Email',
+                                padding: 0.0,
+                                keyboardType: TextInputType.emailAddress,
+                              )
+                            : Container(),
+                        widget.isSigningUp != null
+                            ? const SizedBox(
+                                height: 20.0,
+                              )
+                            : Container(),
+                        _isLoggedInWithEmailAndPassword != null
+                            ? _isLoggedInWithEmailAndPassword
+                                ? CustomInputField(
+                                    controller: _passwordController,
+                                    label: 'Password',
+                                    obsecureText: true,
+                                    keyboardType: TextInputType.visiblePassword,
+                                    suffixIcon: Icons.remove_red_eye,
+                                    padding: 0.0,
+                                  )
+                                : Container()
+                            : widget.isSigningUp != null
+                                ? CustomInputField(
+                                    controller: _passwordController,
+                                    label: 'Password',
+                                    obsecureText: true,
+                                    keyboardType: TextInputType.visiblePassword,
+                                    suffixIcon: Icons.remove_red_eye,
+                                    padding: 0.0,
+                                  )
+                                : Container(),
+                        const SizedBox(
+                          height: 20.0,
+                        ),
+                        CustomInputField(
+                          label: 'Phone Number',
+                          padding: 0.0,
+                          controller: _phoneNumberController,
+                          keyboardType: TextInputType.phone,
+                        ),
+                        const SizedBox(
+                          height: 20.0,
+                        ),
+                        widget.isSigningUp != null
+                            ? CustomSubmitButton(
+                                onSubmit: () => _createAccount(context),
+                                label: 'Register',
+                              )
+                            : Container(),
+                        widget.isSigningUp != null
+                            ? _buildBackToSignInRow(context)
+                            : _buildDeleteAccountRow(),
+                        SizedBox(
+                          height: 15.0,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Positioned(
-              top: screenSize.height * 0.12,
-              left: screenSize.width * 0.3,
-              child: InkWell(
-                onTap: _chooseImageFromGallery,
-                child: CircleAvatar(
-                  radius: 80.0,
-                  backgroundColor: Colors.transparent,
-                  backgroundImage: _selectedImagePath != null
-                      ? _isNewImageChoosed
-                          ? FileImage(File(_selectedImagePath))
-                          : NetworkImage(userData.photoUrl)
-                      : AssetImage('assets/images/icon_user.png'),
+              Positioned(
+                top: screenSize.height * 0.12,
+                left: screenSize.width * 0.3,
+                child: InkWell(
+                  onTap: _chooseImageFromGallery,
+                  child: CircleAvatar(
+                    radius: 80.0,
+                    backgroundColor: Colors.transparent,
+                    backgroundImage: _selectedImagePath != null
+                        ? _isNewImageChoosed
+                            ? FileImage(File(_selectedImagePath))
+                            : NetworkImage(userData.photoUrl)
+                        : AssetImage('assets/images/icon_user.png'),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

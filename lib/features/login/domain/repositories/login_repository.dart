@@ -7,6 +7,7 @@ abstract class LoginRepository {
   //login with Google Account
   Future<Either<Failure, User>> signInWithGoogle();
   Future<Either<Failure, void>> signOutWithGoogle();
+  Future<Either<Failure, User>> signInWithFacebook();
 
   //login with email and password
   Future<Either<Failure, User>> signInWithEmailAndPassword(

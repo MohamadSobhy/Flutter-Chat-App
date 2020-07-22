@@ -116,7 +116,7 @@ class _LoginPageState extends State<LoginPage> {
               CustomAppBarAction(
                 icon: FontAwesomeIcons.facebookF,
                 iconColor: Colors.blue,
-                onActionPressed: () {},
+                onActionPressed: () => _signInUsingFacebook(context),
               ),
               CustomAppBarAction(
                 icon: FontAwesomeIcons.google,
@@ -150,6 +150,10 @@ class _LoginPageState extends State<LoginPage> {
 
   void _singInUsingGoogle(BuildContext context) async {
     BlocProvider.of<LoginBloc>(context).add(SignInWithGoogleEvent());
+  }
+
+  void _signInUsingFacebook(BuildContext context) {
+    BlocProvider.of<LoginBloc>(context).add(SignInWithFacebookEvent());
   }
 
   void _loginWithEmailAndPassword(context) {

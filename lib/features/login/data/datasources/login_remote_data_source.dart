@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +21,12 @@ abstract class LoginRemoteDataSource {
   ///
   /// Throws a [ServerException] for all error codes.
   Future<UserModel> signInWithGoogle();
+
+  //! Login using Facebook Account
+  /// Calls the logIn method of the FacebookLogin package to perform login process.
+  ///
+  /// Throws a [ServerException] for all error codes.
+  Future<UserModel> signInWithFacebook();
 
   /// Calls the signOut method of the GoogleSignIn package to perform logging out process.
   ///
@@ -60,18 +67,24 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
   final FirebaseAuth firebaseAuth;
   final Firestore firestoreInstance;
   final FirebaseStorage storage;
+  final FacebookLogin facebookLogin;
 
   LoginRemoteDataSourceImpl({
     @required this.storage,
     @required this.firestoreInstance,
     @required this.firebaseAuth,
     @required this.googleSignIn,
+    @required this.facebookLogin,
   });
 
   @override
   Future<UserModel> signInWithGoogle() async {
     try {
       GoogleSignInAccount account = await googleSignIn.signIn();
+
+      if (account == null) {
+        throw ServerException(message: 'Login canceled');
+      }
 
       GoogleSignInAuthentication authentication = await account.authentication;
 
@@ -83,34 +96,45 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
       FirebaseUser user =
           (await firebaseAuth.signInWithCredential(authCredential)).user;
 
-      if (user != null) {
-        QuerySnapshot result = await firestoreInstance
-            .collection('users')
-            .where('id', isEqualTo: user.uid)
-            .getDocuments();
-
-        UserModel userData = UserModel(
-          id: user.uid,
-          displayName: user.displayName,
-          email: user.email,
-          password: '',
-          phoneNumber: user.phoneNumber,
-          photoUrl: user.photoUrl,
-        );
-
-        if (result.documents.length == 0) {
-          _storeUserDataOnServer(userData);
-        } else {
-          final userDocument = await _getUserDataFromServer(userData.id);
-
-          userData = UserModel.fromJson(userDocument.data);
-        }
-        return userData;
-      }
+      return await _validateUser(user);
     } catch (error) {
-      throw ServerException(message: error.toString());
+      String message;
+      if (error is ServerException)
+        message = error.message;
+      else
+        message = error.toString();
+      throw ServerException(message: message);
     }
     return null;
+  }
+
+  Future<UserModel> _validateUser(FirebaseUser user) async {
+    if (user != null) {
+      QuerySnapshot result = await firestoreInstance
+          .collection('users')
+          .where('id', isEqualTo: user.uid)
+          .getDocuments();
+
+      UserModel userData = UserModel(
+        id: user.uid,
+        displayName: user.displayName,
+        email: user.email,
+        password: '',
+        phoneNumber: user.phoneNumber,
+        photoUrl: user.photoUrl,
+      );
+
+      if (result.documents.length == 0) {
+        _storeUserDataOnServer(userData);
+      } else {
+        final userDocument = await _getUserDataFromServer(userData.id);
+
+        userData = UserModel.fromJson(userDocument.data);
+      }
+      return userData;
+    } else {
+      throw ServerException(message: 'Login failed.');
+    }
   }
 
   @override
@@ -118,9 +142,47 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
     try {
       await firebaseAuth.signOut();
       //await GoogleSignIn().disconnect();
+      await facebookLogin.logOut();
       await googleSignIn.signOut();
     } catch (error) {
       throw ServerException(message: error.toString());
+    }
+  }
+
+  @override
+  Future<UserModel> signInWithFacebook() async {
+    try {
+      final result = await facebookLogin.logIn(['email']);
+
+      switch (result.status) {
+        case FacebookLoginStatus.loggedIn:
+          {
+            final authCredential = FacebookAuthProvider.getCredential(
+              accessToken: result.accessToken.token,
+            );
+
+            final authResult =
+                await firebaseAuth.signInWithCredential(authCredential);
+
+            return await _validateUser(authResult.user);
+          }
+        case FacebookLoginStatus.cancelledByUser:
+          {
+            throw ServerException(message: 'Login Canceled!');
+          }
+        case FacebookLoginStatus.error:
+        default:
+          {
+            throw ServerException(message: 'Login failed!');
+          }
+      }
+    } catch (error) {
+      String message;
+      if (error is ServerException)
+        message = error.message;
+      else
+        message = error.toString();
+      throw ServerException(message: message);
     }
   }
 
@@ -141,12 +203,12 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
 
       return userModel;
     } catch (error) {
-      String message;
-      if (error.toString().split(',').length > 1)
-        message = error.toString().split(',')[1];
-      else
-        message = error.toString();
-      throw ServerException(message: message);
+      // String message;
+      // if (error.toString().split(',').length > 1)
+      //   message = error.toString().split(',')[1];
+      // else
+      //   message = error.toString();
+      throw ServerException(message: error.message);
     }
   }
 
@@ -170,12 +232,12 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
 
       return user;
     } catch (error) {
-      String message;
-      if (error.toString().split(',').length > 1)
-        message = error.toString().split(',')[1];
-      else
-        message = error.toString();
-      throw ServerException(message: message);
+      // String message;
+      // if (error.toString().split(',').length > 1)
+      //   message = error.toString().split(',')[1];
+      // else
+      //   message = error.toString();
+      throw ServerException(message: error.message);
     }
   }
 

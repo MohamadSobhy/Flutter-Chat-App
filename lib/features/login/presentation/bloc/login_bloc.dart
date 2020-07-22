@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:chat_app/features/login/domain/usecases/sing_in_with_facebook.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/usecases/delete_account_data.dart';
@@ -24,8 +25,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final SignUpWithEmailAndPassword signUpWithEmailAndPassword;
   final UpdateAccountInfo updateAccountInfo;
   final DeleteAccountData deleteAccountData;
+  final SignInWithFacebook signInWithFacebook;
 
   LoginBloc({
+    @required this.signInWithFacebook,
     @required this.signInWithGoogle,
     @required this.signOutWithGoogle,
     @required this.getLoggedInUserData,
@@ -55,6 +58,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         (failure) => ErrorState(message: failure.message),
         (_) => LoggedOutState(),
       );
+    } else if (event is SignInWithFacebookEvent) {
+      yield LoadingState();
+
+      yield* _signInOrSignUpEitherHandler(() => signInWithFacebook(NoParam()));
     } else if (event is CheckLoggedInStateEvent) {
       yield LoadingState();
 

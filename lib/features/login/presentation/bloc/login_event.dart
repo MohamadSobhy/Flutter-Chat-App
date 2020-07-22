@@ -9,6 +9,11 @@ class SignInWithGoogleEvent extends LoginEvent {
   List<Object> get props => [];
 }
 
+class SignInWithFacebookEvent extends LoginEvent {
+  @override
+  List<Object> get props => [];
+}
+
 class SignInWithEmailAndPasswordEvent extends LoginEvent {
   final String email;
   final String password;

@@ -15,7 +15,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "460745823958-jc0nac4c332rb2s3rg5e93ce749p0fi9.apps.googleusercontent.com",
+          "client_id": "YOUR_CLIENT_ID",
           "client_type": 1,
           "android_info": {
             "package_name": "m.example.chat_app",
@@ -23,20 +23,20 @@
           }
         },
         {
-          "client_id": "460745823958-rsm7noc52c2vo64e1qspj9r6ukq0s481.apps.googleusercontent.com",
+          "client_id": "YOUR_CLIENT_ID",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBzRE5DiXO_pwxw76ArAz1ecnJ98OjJgD4"
+          "current_key": "YOUR_API_KEY"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "460745823958-rsm7noc52c2vo64e1qspj9r6ukq0s481.apps.googleusercontent.com",
+              "client_id": "YOUR_CLIENT_ID",
               "client_type": 3
             }
           ]

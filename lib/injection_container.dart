@@ -1,10 +1,7 @@
-import 'package:chat_app/features/login/domain/usecases/delete_account_data.dart';
-import 'package:chat_app/features/login/domain/usecases/sing_in_with_email_password.dart';
-import 'package:chat_app/features/login/domain/usecases/sing_up_with_email_password.dart';
-import 'package:chat_app/features/login/domain/usecases/update_account_info.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
@@ -16,9 +13,14 @@ import 'features/login/data/datasources/login_local_data_source.dart';
 import 'features/login/data/datasources/login_remote_data_source.dart';
 import 'features/login/data/repositories/login_repository_impl.dart';
 import 'features/login/domain/repositories/login_repository.dart';
+import 'features/login/domain/usecases/delete_account_data.dart';
 import 'features/login/domain/usecases/get_logged_in_user_data.dart';
 import 'features/login/domain/usecases/sign_in_with_google.dart';
 import 'features/login/domain/usecases/sign_out_with_google.dart';
+import 'features/login/domain/usecases/sing_in_with_email_password.dart';
+import 'features/login/domain/usecases/sing_in_with_facebook.dart';
+import 'features/login/domain/usecases/sing_up_with_email_password.dart';
+import 'features/login/domain/usecases/update_account_info.dart';
 import 'features/login/presentation/bloc/login_bloc.dart';
 
 final serviceLocator = GetIt.instance;
@@ -35,6 +37,7 @@ Future<void> init() async {
       signUpWithEmailAndPassword: serviceLocator(),
       updateAccountInfo: serviceLocator(),
       deleteAccountData: serviceLocator(),
+      signInWithFacebook: serviceLocator(),
     ),
   );
 
@@ -60,6 +63,9 @@ Future<void> init() async {
   serviceLocator.registerLazySingleton(
     () => DeleteAccountData(repository: serviceLocator()),
   );
+  serviceLocator.registerLazySingleton(
+    () => SignInWithFacebook(repository: serviceLocator()),
+  );
 
   //Repository
   serviceLocator.registerLazySingleton<LoginRepository>(
@@ -77,6 +83,7 @@ Future<void> init() async {
       firestoreInstance: serviceLocator(),
       googleSignIn: serviceLocator(),
       storage: serviceLocator(),
+      facebookLogin: serviceLocator(),
     ),
   );
   serviceLocator.registerLazySingleton<LoginLocalDataSource>(
@@ -100,4 +107,5 @@ Future<void> init() async {
   serviceLocator.registerLazySingleton(() => FirebaseStorage.instance);
   final sharedPreferences = await SharedPreferences.getInstance();
   serviceLocator.registerLazySingleton(() => sharedPreferences);
+  serviceLocator.registerLazySingleton(() => FacebookLogin());
 }

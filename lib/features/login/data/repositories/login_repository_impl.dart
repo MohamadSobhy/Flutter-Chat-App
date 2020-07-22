@@ -32,6 +32,14 @@ class LoginRepositoryImpl implements LoginRepository {
   }
 
   @override
+  Future<Either<Failure, User>> signInWithFacebook() async {
+    return await _signInOrSignUp(() {
+      localDataSource.storeLoginMethod(LoginMethod.facebook);
+      return remoteDataSource.signInWithFacebook();
+    });
+  }
+
+  @override
   Future<Either<Failure, void>> signOutWithGoogle() async {
     if (await networkInfo.isConnected) {
       try {
