@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:chat_app/features/login/data/models/user_model.dart';
+import 'package:chat_app/src/widgets/users_search_delegate.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../features/login/domain/entities/user.dart';
 import '../../features/login/presentation/bloc/login_bloc.dart';
 import '../../features/login/presentation/pages/profile_page.dart';
 import '../../injection_container.dart';
@@ -24,6 +24,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String _userPhotoUrl;
+  List<DocumentSnapshot> usersData;
 
   @override
   void initState() {
@@ -95,11 +96,14 @@ class _HomePageState extends State<HomePage> {
                       child: CircularProgressIndicator(),
                     );
 
+                  usersData = snapshot.data.documents;
+
                   return ListView.builder(
                     itemCount: snapshot.data.documents.length,
                     itemBuilder: (ctx, index) {
                       return UserItem(
-                          userDocument: snapshot.data.documents[index]);
+                        userDocument: snapshot.data.documents[index],
+                      );
                     },
                   );
                 },
@@ -111,7 +115,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _openSearchScreen() {}
+  void _openSearchScreen() {
+    showSearch(
+      context: context,
+      delegate: UsersSearchDelegate(
+        usersData: usersData,
+      ),
+    );
+  }
 
   void _openProfilePage() {
     Routes.sailor.navigate(ProfilePage.routeName, params: {

@@ -32,7 +32,8 @@ class UserItem extends StatelessWidget {
             child: ListTile(
               leading: ClipRRect(
                 borderRadius: BorderRadius.circular(10.0),
-                child: userDocument.data['photoUrl'] == null
+                child: userDocument.data['photoUrl'] == null ||
+                        userDocument.data['photoUrl'].isEmpty
                     ? Image.asset('assets/images/icon_user.png')
                     : CachedNetworkImage(
                         imageUrl: userDocument.data['photoUrl'],

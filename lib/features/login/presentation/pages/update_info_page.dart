@@ -2,20 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:chat_app/features/login/data/datasources/login_local_data_source.dart';
-import 'package:chat_app/features/login/presentation/pages/login_page.dart';
-import 'package:chat_app/src/pages/home_page.dart';
-import 'package:chat_app/src/widgets/custom_app_bar_action.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
-import 'package:sailor/sailor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../injection_container.dart';
-import '../../../../main.dart';
+import '../../../../src/widgets/custom_app_bar_action.dart';
+import '../../data/datasources/login_local_data_source.dart';
 import '../../data/models/user_model.dart';
 import '../bloc/login_bloc.dart';
 import '../widgets/custom_input_field.dart';

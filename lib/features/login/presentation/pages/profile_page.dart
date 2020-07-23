@@ -202,7 +202,7 @@ class _ProfilePageState extends State<ProfilePage> {
             onTap: _viewUserImageOnFullScreen,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(100.0),
-              child: user.photoUrl != null
+              child: user.photoUrl != null && user.photoUrl.isNotEmpty
                   ? CachedNetworkImage(
                       width: 160,
                       height: MediaQuery.of(context).size.width * 0.4,

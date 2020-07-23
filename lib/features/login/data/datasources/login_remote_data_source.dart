@@ -192,6 +192,14 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
     String password,
   ) async {
     try {
+      if (email.isEmpty) {
+        throw ServerException(message: 'Email can\'t be empty');
+      }
+
+      if (password.isEmpty) {
+        throw ServerException(message: 'Password can\'t be empty');
+      }
+
       final authResult = await firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,

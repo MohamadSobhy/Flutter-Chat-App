@@ -11,7 +11,7 @@ class ImageMessageView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: PhotoView(
-        imageProvider: imageUrl == null
+        imageProvider: imageUrl == null || imageUrl.isEmpty
             ? AssetImage('assets/images/icon_user.png')
             : NetworkImage(imageUrl),
         loadingBuilder: (ctx, loadingProgress) {
