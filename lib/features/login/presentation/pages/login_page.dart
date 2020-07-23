@@ -48,6 +48,7 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _emailController,
                     label: 'Email',
                     padding: 0.0,
+                    keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(
                     height: 20.0,
@@ -110,17 +111,22 @@ class _LoginPageState extends State<LoginPage> {
         ),
         Container(
           height: screenSize.height * 0.08,
+          width: screenSize.width * 0.5,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CustomAppBarAction(
-                icon: FontAwesomeIcons.facebookF,
-                iconColor: Colors.blue,
-                onActionPressed: () => _signInUsingFacebook(context),
+              Expanded(
+                child: CustomAppBarAction(
+                  icon: FontAwesomeIcons.facebookF,
+                  iconColor: Colors.blue,
+                  onActionPressed: () => _signInUsingFacebook(context),
+                ),
               ),
-              CustomAppBarAction(
-                icon: FontAwesomeIcons.google,
-                onActionPressed: () => _singInUsingGoogle(context),
+              Expanded(
+                child: CustomAppBarAction(
+                  icon: FontAwesomeIcons.google,
+                  onActionPressed: () => _singInUsingGoogle(context),
+                ),
               )
             ],
           ),

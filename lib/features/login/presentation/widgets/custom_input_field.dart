@@ -40,7 +40,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10.0),
-              color: Colors.grey[200],
+              color: Theme.of(context).cardColor,
             ),
             child: TextField(
               controller: widget.controller,

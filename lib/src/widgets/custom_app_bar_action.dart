@@ -24,7 +24,7 @@ class CustomAppBarAction extends StatelessWidget {
       height: height != null ? height : double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.0),
-        color: Colors.grey[200],
+        color: Theme.of(context).cardColor,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10.0),

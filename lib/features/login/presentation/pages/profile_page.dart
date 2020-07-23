@@ -13,7 +13,7 @@ import '../../data/models/user_model.dart';
 import 'update_info_page.dart';
 
 class ProfilePage extends StatefulWidget {
-  static const String routeName = '/settings';
+  static const String routeName = '/profile';
   final String userId;
 
   const ProfilePage({this.userId});
@@ -122,7 +122,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: <Widget>[
                           Text(
                             user.displayName,
-                            style: Theme.of(context).textTheme.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .title
+                                .copyWith(fontWeight: FontWeight.bold),
                           ),
                           SizedBox(
                             height: 10.0,
@@ -156,6 +159,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return TabBar(
       labelColor: Theme.of(context).primaryColor,
       unselectedLabelColor: Colors.black,
+      indicatorColor: Theme.of(context).accentColor,
       tabs: [
         Padding(
           padding: const EdgeInsets.all(10.0),

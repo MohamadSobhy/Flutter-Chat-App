@@ -29,10 +29,10 @@ class EmptyChatMessage extends StatelessWidget {
               ),
               Text(
                 'start chating with $peerName now.',
-                style: TextStyle(
-                  fontSize: 17.0,
-                  color: Colors.black54,
-                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyText1
+                    .copyWith(color: Colors.grey),
               ),
             ],
           ),

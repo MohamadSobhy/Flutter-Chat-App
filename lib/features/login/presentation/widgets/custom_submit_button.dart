@@ -9,11 +9,11 @@ class CustomSubmitButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 60.0,
-      width: MediaQuery.of(context).size.width,
+      height: 45.0,
+      width: MediaQuery.of(context).size.width * 0.3,
       margin: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 15.0),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15.0),
+        borderRadius: BorderRadius.circular(25.0),
         color: Theme.of(context).primaryColor,
         boxShadow: [
           BoxShadow(

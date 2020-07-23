@@ -13,7 +13,7 @@ class UserItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.grey[100],
+      // color: Colors.grey[100],
       elevation: 0.0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
@@ -52,9 +52,6 @@ class UserItem extends StatelessWidget {
               ),
               subtitle: Text(
                 userDocument.data['email'],
-                style: TextStyle(
-                  color: Colors.black,
-                ),
               ),
             ),
           ),

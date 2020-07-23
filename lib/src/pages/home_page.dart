@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:chat_app/features/login/data/models/user_model.dart';
+import 'package:chat_app/src/pages/settings_page.dart';
 import 'package:chat_app/src/widgets/users_search_delegate.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -133,6 +134,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _openSettingsPage(context) {
-    BlocProvider.of<LoginBloc>(context).add(SignOutWithGoogleEvent());
+    Routes.sailor.navigate(SettingsPage.routeName);
   }
 }

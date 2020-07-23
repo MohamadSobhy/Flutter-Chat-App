@@ -227,7 +227,7 @@ class _UpdateInfoPageState extends State<UpdateInfoPage> {
                             ? _buildBackToSignInRow(context)
                             : _buildDeleteAccountRow(),
                         SizedBox(
-                          height: 15.0,
+                          height: 30.0,
                         ),
                       ],
                     ),
@@ -311,6 +311,7 @@ class _UpdateInfoPageState extends State<UpdateInfoPage> {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         title: Text('Are you sure?'),
         actions: [
           FlatButton(

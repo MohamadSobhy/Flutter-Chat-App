@@ -4,17 +4,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sailor/sailor.dart';
 
+import 'core/theme/bloc/theme_bloc.dart';
 import 'features/login/domain/entities/user.dart';
 import 'features/login/presentation/bloc/login_bloc.dart';
 import 'features/login/presentation/pages/loading_page.dart';
 import 'features/login/presentation/pages/login_page.dart';
 import 'features/login/presentation/pages/profile_page.dart';
 import 'features/login/presentation/pages/update_info_page.dart';
-import 'features/login/presentation/widgets/custom_snackbar.dart';
 import 'injection_container.dart';
 import 'src/pages/chat_page.dart';
 import 'src/pages/home_page.dart';
 import 'src/pages/image_message_view.dart';
+import 'src/pages/settings_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,79 +27,80 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) {
-        final bloc = serviceLocator<LoginBloc>();
-        bloc.add(CheckLoggedInStateEvent());
-        return bloc;
-      },
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Chat App',
-        theme: ThemeData(
-          primarySwatch: Colors.deepOrange,
-          splashColor: Color(0xDDFDEDF3),
-          textTheme: TextTheme(
-            title: GoogleFonts.aBeeZee(fontWeight: FontWeight.bold),
-            body1: GoogleFonts.aBeeZee(),
-            body2: GoogleFonts.aBeeZee(),
-          ),
-        ),
-        home: BlocListener<LoginBloc, LoginState>(
-          listener: (ctx, state) {
-            if (state is AlertMessageState) {
-              _displaySnackBar(
-                context: ctx,
-                message: state.message,
-                isSuccessful: true,
-              );
-            } else if (state is ErrorState) {
-              _displaySnackBar(
-                context: ctx,
-                message: state.message,
-                isSuccessful: false,
-              );
-            }
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) {
+            final bloc = serviceLocator<LoginBloc>();
+            bloc.add(CheckLoggedInStateEvent());
+            return bloc;
           },
-          child: BlocBuilder<LoginBloc, LoginState>(
-            builder: (ctx, state) {
-              if (state is LoggedInState) {
-                try {
-                  serviceLocator.registerLazySingleton(() => state.user);
-                } catch (err) {}
-                return HomePage();
-              } else if (state is LoggedOutState ||
-                  state is AccountDeletedState) {
-                serviceLocator.unregister(
-                  instance: serviceLocator<User>(),
+        ),
+        BlocProvider(
+          create: (_) => ThemeBloc(),
+        ),
+      ],
+      child: BlocBuilder<ThemeBloc, AppThemeState>(
+        builder: (_, state) => MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Chat App',
+          theme: state.themeData,
+          home: BlocListener<LoginBloc, LoginState>(
+            listener: (ctx, state) {
+              if (state is AlertMessageState) {
+                _displaySnackBar(
+                  context: ctx,
+                  message: state.message,
+                  isSuccessful: true,
                 );
-                return LoginPage();
-              } else if (state is LoadingState) {
-                return LoadingPage();
-              } else if (state is AlertMessageState) {
-                try {
-                  final currentUser = serviceLocator<User>();
-                  return HomePage();
-                } catch (error) {
-                  return LoginPage();
-                }
               } else if (state is ErrorState) {
-                try {
-                  final currentUser = serviceLocator<User>();
-                  return HomePage();
-                } catch (error) {
-                  return LoginPage();
-                }
-              } else {
-                return Center(
-                  child: Text('Error Loading Screen'),
+                _displaySnackBar(
+                  context: ctx,
+                  message: state.message,
+                  isSuccessful: false,
                 );
               }
             },
+            child: BlocBuilder<LoginBloc, LoginState>(
+              builder: (ctx, state) {
+                if (state is LoggedInState) {
+                  try {
+                    serviceLocator.registerLazySingleton(() => state.user);
+                  } catch (err) {}
+                  return HomePage();
+                } else if (state is LoggedOutState ||
+                    state is AccountDeletedState) {
+                  serviceLocator.unregister(
+                    instance: serviceLocator<User>(),
+                  );
+                  return LoginPage();
+                } else if (state is LoadingState) {
+                  return LoadingPage();
+                } else if (state is AlertMessageState) {
+                  try {
+                    final currentUser = serviceLocator<User>();
+                    return HomePage();
+                  } catch (error) {
+                    return LoginPage();
+                  }
+                } else if (state is ErrorState) {
+                  try {
+                    final currentUser = serviceLocator<User>();
+                    return HomePage();
+                  } catch (error) {
+                    return LoginPage();
+                  }
+                } else {
+                  return Center(
+                    child: Text('Error Loading Screen'),
+                  );
+                }
+              },
+            ),
           ),
+          onGenerateRoute: Routes.sailor.generator(),
+          navigatorKey: Routes.sailor.navigatorKey,
         ),
-        onGenerateRoute: Routes.sailor.generator(),
-        navigatorKey: Routes.sailor.navigatorKey,
       ),
     );
   }
@@ -178,15 +180,20 @@ class Routes {
         ],
       ),
       SailorRoute(
-          name: UpdateInfoPage.routeName,
-          builder: (_, args, params) {
-            return UpdateInfoPage(
-              isSigningUp: params.param('isSigningUp'),
-            );
-          },
-          params: [
-            SailorParam(name: 'isSigningUp'),
-          ]),
+        name: UpdateInfoPage.routeName,
+        builder: (_, args, params) {
+          return UpdateInfoPage(
+            isSigningUp: params.param('isSigningUp'),
+          );
+        },
+        params: [
+          SailorParam(name: 'isSigningUp'),
+        ],
+      ),
+      SailorRoute(
+        name: SettingsPage.routeName,
+        builder: (_, args, params) => SettingsPage(),
+      ),
     ]);
   }
 }

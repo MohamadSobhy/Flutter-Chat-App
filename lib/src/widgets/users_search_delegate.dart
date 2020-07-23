@@ -8,10 +8,18 @@ class UsersSearchDelegate extends SearchDelegate<String> {
   UsersSearchDelegate({@required this.usersData});
 
   @override
+  ThemeData appBarTheme(BuildContext context) {
+    return Theme.of(context);
+  }
+
+  @override
   List<Widget> buildActions(BuildContext context) {
     return [
       IconButton(
-        icon: Icon(Icons.clear),
+        icon: Icon(
+          Icons.clear,
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
         onPressed: () {
           query = '';
         },
@@ -24,6 +32,7 @@ class UsersSearchDelegate extends SearchDelegate<String> {
     return IconButton(
       icon: AnimatedIcon(
         icon: AnimatedIcons.menu_arrow,
+        color: Theme.of(context).scaffoldBackgroundColor,
         progress: transitionAnimation,
       ),
       onPressed: () {

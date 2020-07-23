@@ -98,6 +98,13 @@ class _ChatPageState extends State<ChatPage> {
       print(e);
     }
 
+    if (selectedImages == null) {
+      setState(() {
+        _isImageOptionClicked = false;
+      });
+      return;
+    }
+
     if (!mounted || selectedImages.isEmpty) {
       setState(() {
         _isImageOptionClicked = !_isImageOptionClicked;
@@ -290,7 +297,7 @@ class _ChatPageState extends State<ChatPage> {
               ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8.0),
-                color: Colors.grey[300],
+                color: Theme.of(context).cardColor,
               ),
               child: Center(
                 child: CircularProgressIndicator(
@@ -508,7 +515,7 @@ class _ChatPageState extends State<ChatPage> {
         maxHeight: MediaQuery.of(context).size.height * 0.3,
       ),
       decoration: BoxDecoration(
-        color: Colors.grey[300],
+        color: Theme.of(context).cardColor,
       ),
       // child: Center(
       //   child: CircularProgressIndicator(
@@ -630,17 +637,16 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildStickerList() {
     return Card(
-      color: Colors.grey[200],
       margin: const EdgeInsets.all(0.0),
       child: Container(
         height: MediaQuery.of(context).size.height * 0.4,
         child: GridView.builder(
           padding: const EdgeInsets.all(10.0),
           gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 120.0,
+            maxCrossAxisExtent: 100.0,
             childAspectRatio: 1.0,
-            crossAxisSpacing: 10.0,
-            mainAxisSpacing: 10.0,
+            crossAxisSpacing: 8.0,
+            mainAxisSpacing: 8.0,
           ),
           itemCount: 18,
           itemBuilder: (ctx, index) {
@@ -650,11 +656,27 @@ class _ChatPageState extends State<ChatPage> {
             } else {
               count = -8;
             }
-            return InkWell(
-              child: Image.asset('assets/Stickers/mimi${index + count}.gif'),
-              onTap: () {
-                _sendSticker('mimi${index + count}');
-              },
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Theme.of(context).accentColor,
+                        width: 0.5,
+                      ),
+                    ),
+                    child:
+                        Image.asset('assets/Stickers/mimi${index + count}.gif'),
+                  ),
+                  onTap: () {
+                    _sendSticker('mimi${index + count}');
+                  },
+                ),
+              ),
             );
           },
         ),
@@ -681,8 +703,11 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildMessageInput() {
     return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(25),
+      ),
       elevation: 0.0,
-      margin: const EdgeInsets.all(0.0),
+      margin: const EdgeInsets.all(15.0),
       child: Container(
         height: 45,
         child: Row(
@@ -735,35 +760,51 @@ class _ChatPageState extends State<ChatPage> {
               },
             ),
             Expanded(
-              child: TextField(
-                focusNode: _focusNode,
-                controller: _messageFieldController,
-                textAlign: _isTypingInArabic ? TextAlign.right : TextAlign.left,
-                textDirection:
-                    _isTypingInArabic ? TextDirection.rtl : TextDirection.ltr,
-                maxLines: 6,
-                cursorColor: Colors.deepOrange,
-                decoration: InputDecoration(
-                  enabledBorder: InputBorder.none,
-                  border: OutlineInputBorder(),
-                  hintText: 'Type a message . . .',
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 10.0,
-                    vertical: 10.0,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3.0),
+                child: TextField(
+                  focusNode: _focusNode,
+                  controller: _messageFieldController,
+                  textAlign:
+                      _isTypingInArabic ? TextAlign.right : TextAlign.left,
+                  textDirection:
+                      _isTypingInArabic ? TextDirection.rtl : TextDirection.ltr,
+                  maxLines: 6,
+                  cursorColor: Colors.deepOrange,
+                  decoration: InputDecoration(
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).splashColor.withOpacity(0.3),
+                        width: 0.5,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).primaryColor,
+                        width: 0.5,
+                      ),
+                    ),
+                    hintText: 'Type a message . . .',
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10.0,
+                      vertical: 10.0,
+                    ),
                   ),
-                ),
-                onChanged: (String value) {
-                  if (value.trim().isNotEmpty) {
-                    _isTyping = true;
-                    if (_checkForArabicLetter(value)) {
-                      _isTypingInArabic = true;
+                  onChanged: (String value) {
+                    if (value.trim().isNotEmpty) {
+                      _isTyping = true;
+                      if (_checkForArabicLetter(value)) {
+                        _isTypingInArabic = true;
+                      }
+                    } else {
+                      _isTyping = false;
+                      _isTypingInArabic = false;
                     }
-                  } else {
-                    _isTyping = false;
-                    _isTypingInArabic = false;
-                  }
-                  setState(() {});
-                },
+                    setState(() {});
+                  },
+                ),
               ),
             ),
             InkWell(

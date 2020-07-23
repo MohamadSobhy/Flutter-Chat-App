@@ -33,6 +33,7 @@ class _LoadingPageState extends State<LoadingPage>
             tag: 'hero',
             child: CircleAvatar(
               radius: _scaleAnimationController.value * 40,
+              backgroundColor: Theme.of(context).primaryColor,
             ),
           ),
         ),
