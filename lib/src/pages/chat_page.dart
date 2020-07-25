@@ -51,6 +51,8 @@ class _ChatPageState extends State<ChatPage> {
     _readUserData();
     _focusNode.addListener(_onFocusChanged);
 
+    _setChattingWithValue();
+
     super.initState();
   }
 
@@ -61,6 +63,13 @@ class _ChatPageState extends State<ChatPage> {
         _isImageOptionClicked = false;
       });
     }
+  }
+
+  void _setChattingWithValue() {
+    Firestore.instance
+        .collection('users')
+        .document(userId)
+        .updateData({'chattingWith': widget.peerId});
   }
 
   _readUserData() {
@@ -840,5 +849,14 @@ class _ChatPageState extends State<ChatPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    Firestore.instance
+        .collection('users')
+        .document(userId)
+        .updateData({'chattingWith': null});
+    super.dispose();
   }
 }

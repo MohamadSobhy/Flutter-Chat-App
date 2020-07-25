@@ -4,11 +4,15 @@ import 'dart:io';
 import 'package:chat_app/core/error/exceptions.dart';
 import 'package:chat_app/features/login/data/datasources/login_local_data_source.dart';
 import 'package:chat_app/injection_container.dart';
+import 'package:chat_app/main.dart';
+import 'package:chat_app/src/pages/chat_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -60,6 +64,12 @@ abstract class LoginRemoteDataSource {
   ///
   /// Throws a [ServerException] for all error cases.
   Future<String> deleteAccount(UserModel user);
+
+  /// Uses the Firebase MEssaging package to register the user
+  /// for Notifications when he recieved a message.
+  ///
+  /// Throws [ServerException] for all error codes.
+  Future<void> registerNotificationsForUser(String currentUserId);
 }
 
 class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
@@ -68,8 +78,12 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
   final Firestore firestoreInstance;
   final FirebaseStorage storage;
   final FacebookLogin facebookLogin;
+  final FirebaseMessaging firebaseMessaging;
+  final FlutterLocalNotificationsPlugin flutterLocalNotifications;
 
   LoginRemoteDataSourceImpl({
+    @required this.flutterLocalNotifications,
+    @required this.firebaseMessaging,
     @required this.storage,
     @required this.firestoreInstance,
     @required this.firebaseAuth,
@@ -320,5 +334,89 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
     final taskSnapshot = await task.onComplete;
     user.photoUrl = await taskSnapshot.ref.getDownloadURL();
     print(user.photoUrl);
+  }
+
+  @override
+  Future<void> registerNotificationsForUser(String currentUserId) {
+    firebaseMessaging.requestNotificationPermissions();
+
+    firebaseMessaging.configure(onMessage: (Map<String, dynamic> message) {
+      print('onMessage: $message');
+
+      String chatGroupId = _getChatGroupId(message, currentUserId);
+
+      _showNotification(message['notification'], chatGroupId);
+      return;
+    }, onResume: (Map<String, dynamic> message) {
+      print('onResume: $message');
+
+      Routes.sailor.navigate(ChatPage.routeName, params: {
+        'peerId': message['data']['idFrom'],
+        'peerName': message['data']['peerName'],
+        'peerImageUrl': message['data']['peerImageUrl'],
+      });
+
+      return;
+    }, onLaunch: (Map<String, dynamic> message) {
+      print('onLaunch: $message');
+
+      Routes.sailor.navigate(ChatPage.routeName, params: {
+        'peerId': message['data']['idFrom'],
+        'peerName': message['data']['peerName'],
+        'peerImageUrl': message['data']['peerImageUrl'],
+      });
+
+      return;
+    });
+
+    firebaseMessaging.getToken().then((token) {
+      print('token: $token');
+      Firestore.instance
+          .collection('users')
+          .document(currentUserId)
+          .updateData({'pushToken': token});
+    }).catchError((err) {
+      throw ServerException(
+          message: 'Failed to complete the login process. please try again.');
+    });
+  }
+
+  String _getChatGroupId(Map<String, dynamic> message, String currentUserId) {
+    String chatGroupId;
+    final peerId = message['data']['idFrom'] as String;
+
+    if (currentUserId.hashCode <= peerId.hashCode) {
+      chatGroupId = '$currentUserId-${peerId}';
+    } else {
+      chatGroupId = '${peerId}-$currentUserId';
+    }
+    return chatGroupId;
+  }
+
+  void _showNotification(notification, String chatGroupId) {
+    final androidChannelSpecifics = AndroidNotificationDetails(
+      'com.example.chat_app',
+      'Chat App',
+      'Messages channel',
+      playSound: true,
+      enableVibration: true,
+      enableLights: true,
+      groupKey: chatGroupId,
+      importance: Importance.Max,
+      priority: Priority.High,
+    );
+
+    final iosChannelSpecifics = IOSNotificationDetails();
+
+    final platformChannelSpecifics =
+        NotificationDetails(androidChannelSpecifics, iosChannelSpecifics);
+
+    flutterLocalNotifications.show(
+      (chatGroupId.hashCode % 2147483647),
+      notification['title'].toString(),
+      notification['body'].toString(),
+      platformChannelSpecifics,
+      payload: json.encode(notification),
+    );
   }
 }

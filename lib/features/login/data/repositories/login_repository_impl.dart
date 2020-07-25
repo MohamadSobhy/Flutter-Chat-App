@@ -118,6 +118,7 @@ class LoginRepositoryImpl implements LoginRepository {
         final user = await signInOrSignOut();
 
         localDataSource.cacheUserData(user);
+        remoteDataSource.registerNotificationsForUser(user.id);
 
         return Right(user);
       } on ServerException catch (error) {
