@@ -1,20 +1,20 @@
 import 'dart:convert';
 
-import 'package:chat_app/features/login/data/models/user_model.dart';
-import 'package:chat_app/src/pages/settings_page.dart';
-import 'package:chat_app/src/widgets/users_search_delegate.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../features/login/presentation/bloc/login_bloc.dart';
+import '../../features/login/data/models/user_model.dart';
 import '../../features/login/presentation/pages/profile_page.dart';
 import '../../injection_container.dart';
 import '../../main.dart';
+import '../providers/users_provider.dart';
 import '../widgets/custom_app_bar_action.dart';
 import '../widgets/user_image_avatar.dart';
 import '../widgets/user_item.dart';
+import '../widgets/users_search_delegate.dart';
+import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
   static const String routeName = '/dashboard';
@@ -26,13 +26,17 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String _userPhotoUrl;
   List<DocumentSnapshot> usersData;
+  String currentUserId;
 
   @override
   void initState() {
     final userJsonString =
         serviceLocator<SharedPreferences>().getString('user');
-    if (userJsonString != null)
-      _userPhotoUrl = UserModel.fromJson(json.decode(userJsonString)).photoUrl;
+    if (userJsonString != null) {
+      final user = UserModel.fromJson(json.decode(userJsonString));
+      _userPhotoUrl = user.photoUrl;
+      currentUserId = user.id;
+    }
     super.initState();
   }
 
@@ -89,21 +93,53 @@ class _HomePageState extends State<HomePage> {
                   topRight: Radius.circular(35.0),
                 ),
               ),
-              child: StreamBuilder(
-                stream: Firestore.instance.collection('users').snapshots(),
-                builder: (ctx, AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (!snapshot.hasData)
+              child: FutureBuilder<Stream<List<DocumentSnapshot>>>(
+                future: Provider.of<UsersProvider>(context)
+                    .getListOfFriends(currentUserId),
+                builder: (ctx, snap) {
+                  if (!snap.hasData) {
                     return Center(
                       child: CircularProgressIndicator(),
                     );
+                  }
+                  return StreamBuilder<List<DocumentSnapshot>>(
+                    stream: snap.data,
+                    builder:
+                        (ctx, AsyncSnapshot<List<DocumentSnapshot>> snapshot) {
+                      if (!snapshot.hasData) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
 
-                  usersData = snapshot.data.documents;
+                      usersData = snapshot.data;
 
-                  return ListView.builder(
-                    itemCount: snapshot.data.documents.length,
-                    itemBuilder: (ctx, index) {
-                      return UserItem(
-                        userDocument: snapshot.data.documents[index],
+                      if (snapshot.data.isEmpty) {
+                        return Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset('assets/images/chat_icon.png'),
+                              Text(
+                                'You don\'t have friends!. Try to add some. ☺️😊',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyText1
+                                    .copyWith(fontSize: 18),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        itemCount: snapshot.data.length,
+                        itemBuilder: (ctx, index) {
+                          return UserItem(
+                            userDocument: snapshot.data[index],
+                          );
+                        },
                       );
                     },
                   );

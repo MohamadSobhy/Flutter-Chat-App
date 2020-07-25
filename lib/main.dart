@@ -1,7 +1,9 @@
+import 'package:chat_app/src/providers/users_provider.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:sailor/sailor.dart';
 
 import 'core/theme/bloc/theme_bloc.dart';
@@ -40,66 +42,69 @@ class MyApp extends StatelessWidget {
           create: (_) => ThemeBloc(),
         ),
       ],
-      child: BlocBuilder<ThemeBloc, AppThemeState>(
-        builder: (_, state) => MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Chat App',
-          theme: state.themeData,
-          home: BlocListener<LoginBloc, LoginState>(
-            listener: (ctx, state) {
-              if (state is AlertMessageState) {
-                _displaySnackBar(
-                  context: ctx,
-                  message: state.message,
-                  isSuccessful: true,
-                );
-              } else if (state is ErrorState) {
-                _displaySnackBar(
-                  context: ctx,
-                  message: state.message,
-                  isSuccessful: false,
-                );
-              }
-            },
-            child: BlocBuilder<LoginBloc, LoginState>(
-              builder: (ctx, state) {
-                if (state is LoggedInState) {
-                  try {
-                    serviceLocator.registerLazySingleton(() => state.user);
-                  } catch (err) {}
-                  return HomePage();
-                } else if (state is LoggedOutState ||
-                    state is AccountDeletedState) {
-                  serviceLocator.unregister(
-                    instance: serviceLocator<User>(),
+      child: ChangeNotifierProvider<UsersProvider>(
+        create: (_) => UsersProvider(),
+        child: BlocBuilder<ThemeBloc, AppThemeState>(
+          builder: (_, state) => MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Chat App',
+            theme: state.themeData,
+            home: BlocListener<LoginBloc, LoginState>(
+              listener: (ctx, state) {
+                if (state is AlertMessageState) {
+                  _displaySnackBar(
+                    context: ctx,
+                    message: state.message,
+                    isSuccessful: true,
                   );
-                  return LoginPage();
-                } else if (state is LoadingState) {
-                  return LoadingPage();
-                } else if (state is AlertMessageState) {
-                  try {
-                    final currentUser = serviceLocator<User>();
-                    return HomePage();
-                  } catch (error) {
-                    return LoginPage();
-                  }
                 } else if (state is ErrorState) {
-                  try {
-                    final currentUser = serviceLocator<User>();
-                    return HomePage();
-                  } catch (error) {
-                    return LoginPage();
-                  }
-                } else {
-                  return Center(
-                    child: Text('Error Loading Screen'),
+                  _displaySnackBar(
+                    context: ctx,
+                    message: state.message,
+                    isSuccessful: false,
                   );
                 }
               },
+              child: BlocBuilder<LoginBloc, LoginState>(
+                builder: (ctx, state) {
+                  if (state is LoggedInState) {
+                    try {
+                      serviceLocator.registerLazySingleton(() => state.user);
+                    } catch (err) {}
+                    return HomePage();
+                  } else if (state is LoggedOutState ||
+                      state is AccountDeletedState) {
+                    serviceLocator.unregister(
+                      instance: serviceLocator<User>(),
+                    );
+                    return LoginPage();
+                  } else if (state is LoadingState) {
+                    return LoadingPage();
+                  } else if (state is AlertMessageState) {
+                    try {
+                      final currentUser = serviceLocator<User>();
+                      return HomePage();
+                    } catch (error) {
+                      return LoginPage();
+                    }
+                  } else if (state is ErrorState) {
+                    try {
+                      final currentUser = serviceLocator<User>();
+                      return HomePage();
+                    } catch (error) {
+                      return LoginPage();
+                    }
+                  } else {
+                    return Center(
+                      child: Text('Error Loading Screen'),
+                    );
+                  }
+                },
+              ),
             ),
+            onGenerateRoute: Routes.sailor.generator(),
+            navigatorKey: Routes.sailor.navigatorKey,
           ),
-          onGenerateRoute: Routes.sailor.generator(),
-          navigatorKey: Routes.sailor.navigatorKey,
         ),
       ),
     );

@@ -1,14 +1,18 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat_app/src/providers/users_provider.dart';
+import 'package:chat_app/src/widgets/custom_confirmation_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../injection_container.dart';
 import '../../../../main.dart';
 import '../../../../src/pages/image_message_view.dart';
 import '../../../../src/widgets/custom_app_bar_action.dart';
+import '../../../../src/widgets/manage_friends_page_content.dart';
 import '../../data/models/user_model.dart';
 import 'update_info_page.dart';
 
@@ -38,12 +42,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Stream _getUserDataStream() {
     UserModel user;
     if (widget.userId == null) {
-      final userJsonString =
-          serviceLocator<SharedPreferences>().getString('user');
-      if (userJsonString != null)
-        user = UserModel.fromJson(
-          json.decode(userJsonString),
-        );
+      user = _getCurrentUserData();
       return Stream.value(user);
     } else {
       return serviceLocator<Firestore>()
@@ -51,6 +50,17 @@ class _ProfilePageState extends State<ProfilePage> {
           .document(widget.userId)
           .snapshots();
     }
+  }
+
+  UserModel _getCurrentUserData() {
+    final userJsonString =
+        serviceLocator<SharedPreferences>().getString('user');
+    UserModel user;
+    if (userJsonString != null)
+      user = UserModel.fromJson(
+        json.decode(userJsonString),
+      );
+    return user;
   }
 
   @override
@@ -87,17 +97,21 @@ class _ProfilePageState extends State<ProfilePage> {
                     onActionPressed: _goBack,
                   ),
                 ),
-                widget.userId == null
-                    ? Positioned(
-                        top: 30.0,
-                        right: 0.0,
-                        child: CustomAppBarAction(
-                          height: 45.0,
-                          icon: Icons.edit,
-                          onActionPressed: _goToEditProfileScreen,
-                        ),
-                      )
-                    : Container(),
+                Positioned(
+                  top: 30.0,
+                  right: 0.0,
+                  child: CustomAppBarAction(
+                    height: 45.0,
+                    icon: widget.userId == null ||
+                            widget.userId == _getCurrentUserData().id
+                        ? Icons.edit
+                        : Icons.delete_sweep,
+                    onActionPressed: widget.userId == null ||
+                            widget.userId == _getCurrentUserData().id
+                        ? _goToEditProfileScreen
+                        : _performUnFriendRequest,
+                  ),
+                ),
                 Positioned(
                   top: screenSize.height * 0.25,
                   child: Container(
@@ -163,15 +177,17 @@ class _ProfilePageState extends State<ProfilePage> {
       tabs: [
         Padding(
           padding: const EdgeInsets.all(10.0),
-          child: Text(
-            'Experience',
-            style: TextStyle(fontSize: 18.0),
+          child: FittedBox(
+            child: Text(
+              'Friend Requests',
+              style: TextStyle(fontSize: 18.0),
+            ),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(10.0),
           child: Text(
-            'Reviews(0)',
+            'Add Friends',
             style: TextStyle(fontSize: 18.0),
           ),
         ),
@@ -183,12 +199,32 @@ class _ProfilePageState extends State<ProfilePage> {
     return Expanded(
       child: TabBarView(
         children: [
-          Center(
-            child: Text('No Experience available.'),
+          widget.userId == null || widget.userId == _getCurrentUserData().id
+              ? ManageFriendsPageContent(
+                  contentType: UsersType.friendRequests,
+                  userId: user.id,
+                )
+              : Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.do_not_disturb_alt,
+                        size: 40,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'You can not see this content because it is private content.',
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+          ManageFriendsPageContent(
+            userId: user.id,
+            contentType: UsersType.addFriends,
           ),
-          Center(
-            child: Text('No Reviews available.'),
-          )
         ],
       ),
     );
@@ -246,6 +282,27 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {});
       print('refresh');
     });
+  }
+
+  void _performUnFriendRequest() async {
+    final currentUserId = _getCurrentUserData().id;
+    final isConfirmed = await showDialog(
+      child: CustomConfirmationDialog(
+        title: 'Do you want to unfriend this user?',
+        onCancelPressed: () {
+          Navigator.of(context).pop(false);
+        },
+        onOkPressed: () {
+          Navigator.of(context).pop(true);
+        },
+      ),
+      context: context,
+    );
+    if (isConfirmed != null && isConfirmed) {
+      Provider.of<UsersProvider>(context, listen: false)
+          .unFriendUser(currentUserId, widget.userId);
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
   }
 
   void _goBack() {
