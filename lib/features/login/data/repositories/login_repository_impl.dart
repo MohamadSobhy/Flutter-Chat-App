@@ -122,7 +122,8 @@ class LoginRepositoryImpl implements LoginRepository {
 
         return Right(user);
       } on ServerException catch (error) {
-        return Left(ServerFailure(message: error.message.split('.')[0]));
+        print('Error:${error.message}');
+        return Left(ServerFailure(message: error.message.split(',')[1]));
       }
     } else {
       return Left(NetworkFailure(message: NO_INTERNET_CONNECTION));
